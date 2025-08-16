@@ -3,7 +3,7 @@ import type { Design, DesignStatusHistory } from './supabase'
 
 export interface CreateDesignData {
   name: string
-  type: 'web_application' | 'website'
+  type: 'website' | 'landing_page'
   pages_count: number
   figma_link?: string
   description?: string

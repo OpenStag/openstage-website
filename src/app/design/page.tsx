@@ -21,9 +21,16 @@ export default function DesignPage() {
   const [submitting, setSubmitting] = useState(false)
   const [designs, setDesigns] = useState<DesignWithHistory[]>([])
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
   // Form state
-  const [formData, setFormData] = useState<CreateDesignData>({
+  const [formData, setFormData] = useState<{
+    name: string;
+    type: 'website' | 'landing_page';
+    pages_count: number;
+    figma_link?: string;
+    description?: string;
+  }>({
     name: '',
     type: 'website',
     pages_count: 1,
@@ -71,6 +78,19 @@ export default function DesignPage() {
     e.preventDefault()
     setSubmitting(true)
     setMessage(null)
+    setFormError(null)
+
+    // Validation logic
+    if (formData.type === 'website' && formData.pages_count < 3) {
+      setFormError('A website must have at least 3 pages.')
+      setSubmitting(false)
+      return
+    }
+    if (formData.type === 'landing_page' && formData.pages_count !== 1) {
+      setFormError('A landing page must have exactly 1 page.')
+      setSubmitting(false)
+      return
+    }
 
     try {
       // Validate required fields
@@ -146,12 +166,12 @@ export default function DesignPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Submit Your Design</h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2">
             Upload your design details and track their progress through our review process.
           </p>
         </div>
@@ -168,82 +188,70 @@ export default function DesignPage() {
         )}
 
         {/* Design Upload Form */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">New Design Submission</h2>
+        <div className="bg-white dark:bg-slate-800  rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-6">New Design Submission</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Design Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Design Name *
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your design name"
-                required
-              />
+            {/* Row 1: Design Name & Project Type */}
+            <div className="flex flex-col md:flex-row md:space-x-6">
+              <div className="flex-1 mb-4 md:mb-0">
+                <label htmlFor="name" className="block text-sm font-medium mb-2">Design Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your design name"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="type" className="block text-sm font-medium  mb-2">Project Type *</label>
+                <select
+                  id="type"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'website' | 'landing_page' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="website">Website</option>
+                  <option value="landing_page">Landing Page</option>
+                </select>
+              </div>
             </div>
 
-            {/* Type Selection */}
-            <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
-                Project Type *
-              </label>
-              <select
-                id="type"
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'web_application' | 'website' })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                <option value="website">Website</option>
-                <option value="web_application">Web Application</option>
-              </select>
+            {/* Row 2: Number of Pages & Figma Link */}
+            <div className="flex flex-col md:flex-row md:space-x-6">
+              <div className="flex-1 mb-4 md:mb-0">
+                <label htmlFor="pages_count" className="block text-sm font-medium mb-2">Number of Pages *</label>
+                <input
+                  type="number"
+                  id="pages_count"
+                  min="1"
+                  value={formData.pages_count}
+                  onChange={(e) => setFormData({ ...formData, pages_count: parseInt(e.target.value) || 1 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="figma_link" className="block text-sm font-medium mb-2">Figma Link</label>
+                <input
+                  type="url"
+                  id="figma_link"
+                  value={formData.figma_link}
+                  onChange={(e) => setFormData({ ...formData, figma_link: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="https://www.figma.com/file/..."
+                />
+                <p className="mt-1 text-sm text-gray-500">Provide a shareable Figma link to your design</p>
+              </div>
             </div>
 
-            {/* Pages Count */}
+            {/* Row 3: Description (spans both columns) */}
             <div>
-              <label htmlFor="pages_count" className="block text-sm font-medium text-gray-700 mb-2">
-                Number of Pages *
-              </label>
-              <input
-                type="number"
-                id="pages_count"
-                min="1"
-                value={formData.pages_count}
-                onChange={(e) => setFormData({ ...formData, pages_count: parseInt(e.target.value) || 1 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            {/* Figma Link */}
-            <div>
-              <label htmlFor="figma_link" className="block text-sm font-medium text-gray-700 mb-2">
-                Figma Link
-              </label>
-              <input
-                type="url"
-                id="figma_link"
-                value={formData.figma_link}
-                onChange={(e) => setFormData({ ...formData, figma_link: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://www.figma.com/file/..."
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Provide a shareable Figma link to your design
-              </p>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
+              <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
               <textarea
                 id="description"
                 rows={4}
@@ -253,6 +261,11 @@ export default function DesignPage() {
                 placeholder="Describe your design, its purpose, target audience, or any special requirements..."
               />
             </div>
+
+            {/* Error Message */}
+            {formError && (
+              <div className="mb-4 text-red-600 font-semibold">{formError}</div>
+            )}
 
             {/* Submit Button */}
             <div>

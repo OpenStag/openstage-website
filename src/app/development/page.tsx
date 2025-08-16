@@ -14,13 +14,18 @@ interface DesignWithUser extends Design {
   }
 }
 
+// Add a type for joined count
+interface DesignWithUserAndJoined extends DesignWithUser {
+  joinedCount: number;
+}
+
 export default function DevelopmentPage() {
-  const [acceptedDesigns, setAcceptedDesigns] = useState<DesignWithUser[]>([])
-  const [ongoingDesigns, setOngoingDesigns] = useState<DesignWithUser[]>([])
-  const [completedDesigns, setCompletedDesigns] = useState<DesignWithUser[]>([])
+  const [acceptedDesigns, setAcceptedDesigns] = useState<DesignWithUserAndJoined[]>([])
+  const [ongoingDesigns, setOngoingDesigns] = useState<DesignWithUserAndJoined[]>([])
+  const [completedDesigns, setCompletedDesigns] = useState<DesignWithUserAndJoined[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [debugMode, setDebugMode] = useState(false)
+  const [sectionFilter, setSectionFilter] = useState<'all' | 'join' | 'ongoing' | 'completed'>('join')
 
   useEffect(() => {
     loadDesigns()
@@ -31,24 +36,19 @@ export default function DevelopmentPage() {
       setLoading(true)
       setError(null)
 
-      console.log('Loading development designs...')
-
-      // First, try a simple query without JOIN to test if the table exists
+  // First, try a simple query without JOIN to test if the table exists
       const { data: simpleData, error: simpleError } = await supabase
         .from('designs')
         .select('*')
         .in('status', ['accepted', 'in_development', 'completed'])
         .order('created_at', { ascending: false })
 
-      console.log('Simple query result:', { data: simpleData, error: simpleError })
 
       if (simpleError) {
-        console.error('Simple query error:', simpleError)
         throw new Error(`Database error: ${simpleError.message} (Code: ${simpleError.code})`)
       }
 
       if (!simpleData || simpleData.length === 0) {
-        console.log('No designs found with development statuses')
         setAcceptedDesigns([])
         setOngoingDesigns([])
         setCompletedDesigns([])
@@ -78,7 +78,6 @@ export default function DevelopmentPage() {
 
           designsWithUsers.push(designWithUser)
         } catch (userError) {
-          console.warn(`Could not load user for design ${design.id}:`, userError)
           // Still add the design with placeholder user data
           designsWithUsers.push({
             ...design,
@@ -92,45 +91,69 @@ export default function DevelopmentPage() {
         }
       }
 
-      console.log(`Processed ${designsWithUsers.length} designs with user data`)
-
-      // Separate designs by status
-      const accepted = designsWithUsers.filter(d => d.status === 'accepted')
-      const ongoing = designsWithUsers.filter(d => d.status === 'in_development')
-      const completed = designsWithUsers.filter(d => d.status === 'completed')
-
-      console.log('Design counts:', { 
-        accepted: accepted.length, 
-        ongoing: ongoing.length, 
-        completed: completed.length 
-      })
-
-      setAcceptedDesigns(accepted)
-      setOngoingDesigns(ongoing)
-      setCompletedDesigns(completed)
-
-    } catch (error) {
-      console.error('Error loading designs:', error)
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Failed to load designs. Please check your database connection.'
-      setError(errorMessage)
-    } finally {
-      setLoading(false)
+      // Fetch joined counts for all accepted designs
+      const acceptedDesignsRaw = designsWithUsers.filter(d => d.status === 'accepted')
+      const joinedCounts: Record<string, number> = {}
+      if (acceptedDesignsRaw.length > 0) {
+        // Supabase doesn't support .group, so fetch all and count in JS
+        const { data: joinedRows, error: joinedError } = await supabase
+          .from('development_team_members')
+          .select('design_id, user_id')
+          .in('design_id', acceptedDesignsRaw.map(d => d.id))
+        if (!joinedError && joinedRows) {
+          for (const row of joinedRows) {
+            if (!joinedCounts[row.design_id]) joinedCounts[row.design_id] = 0;
+            joinedCounts[row.design_id]++;
+          }
+        }
+      }
+        const accepted: DesignWithUserAndJoined[] = acceptedDesignsRaw.map(d => ({
+          ...d,
+          joinedCount: joinedCounts[d.id] || 0
+        }))
+  
+        // Separate designs by status
+        const ongoingRaw = designsWithUsers.filter(d => d.status === 'in_development')
+        const completedRaw = designsWithUsers.filter(d => d.status === 'completed')
+  
+        // For ongoing/completed, fetch joined counts as well (optional, fallback to 0 if not found)
+        const allOngoingCompleted = [...ongoingRaw, ...completedRaw]
+        let joinedCountsAll: Record<string, number> = {}
+        if (allOngoingCompleted.length > 0) {
+          const { data: joinedRows, error: joinedError } = await supabase
+            .from('development_team_members')
+            .select('design_id, user_id')
+            .in('design_id', allOngoingCompleted.map(d => d.id))
+          if (!joinedError && joinedRows) {
+            for (const row of joinedRows) {
+              if (!joinedCountsAll[row.design_id]) joinedCountsAll[row.design_id] = 0;
+              joinedCountsAll[row.design_id]++;
+            }
+          }
+        }
+        const ongoing: DesignWithUserAndJoined[] = ongoingRaw.map(d => ({ ...d, joinedCount: joinedCountsAll[d.id] || 0 }))
+        const completed: DesignWithUserAndJoined[] = completedRaw.map(d => ({ ...d, joinedCount: joinedCountsAll[d.id] || 0 }))
+  
+        setAcceptedDesigns(accepted)
+        setOngoingDesigns(ongoing)
+        setCompletedDesigns(completed)
+      } catch (error) {
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : 'Failed to load designs. Please check your database connection.'
+        setError(errorMessage)
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
   const testDatabaseConnection = async () => {
     try {
-      console.log('Testing database connection...')
-      
       // Test if designs table exists and has any data
       const { data: allDesigns, error: allError } = await supabase
         .from('designs')
         .select('id, name, status')
         .limit(10)
-
-      console.log('All designs test:', { data: allDesigns, error: allError })
 
       // Test if profiles table exists
       const { data: profiles, error: profileError } = await supabase
@@ -138,29 +161,15 @@ export default function DevelopmentPage() {
         .select('id, email')
         .limit(5)
 
-      console.log('Profiles test:', { data: profiles, error: profileError })
-
       // Test specific statuses
       const { data: statusTest, error: statusError } = await supabase
         .from('designs')
         .select('status')
         .in('status', ['accepted', 'in_development', 'completed'])
 
-      console.log('Status test:', { data: statusTest, error: statusError })
-
     } catch (error) {
-      console.error('Database test failed:', error)
     }
   }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
   const getUserDisplayName = (user: DesignWithUser['user']) => {
     if (user.first_name && user.last_name) {
       return `${user.first_name} ${user.last_name}`
@@ -171,36 +180,23 @@ export default function DevelopmentPage() {
     return user.email
   }
 
-  const DesignCard = ({ design, showJoinButton = false }: { design: DesignWithUser, showJoinButton?: boolean }) => (
+  const DesignCard = ({ design, showJoinButton = false }: { design: DesignWithUserAndJoined, showJoinButton?: boolean }) => (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{design.name}</h3>
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-2">
-            <span className="inline-flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
-              {getUserDisplayName(design.user)}
-            </span>
-            <span>•</span>
             <span>{TYPE_LABELS[design.type]}</span>
             <span>•</span>
             <span>{design.pages_count} page{design.pages_count > 1 ? 's' : ''}</span>
           </div>
-          <p className="text-xs text-gray-500">
-            Submitted on {formatDate(design.created_at)}
-            {design.accepted_at && (
-              <span> • Accepted on {formatDate(design.accepted_at)}</span>
-            )}
-            {design.development_started_at && (
-              <span> • Started on {formatDate(design.development_started_at)}</span>
-            )}
-            {design.completed_at && (
-              <span> • Completed on {formatDate(design.completed_at)}</span>
-            )}
-          </p>
+          {/* Team info */}
+          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-700 mb-2">
+            <span>Total allowed: <b>{design.pages_count}</b></span>
+            <span>Joined: <b>{design.joinedCount}</b></span>
+            <span>Remaining: <b>{Math.max(0, design.pages_count - design.joinedCount)}</b></span>
+          </div>
         </div>
         <div className="mt-3 sm:mt-0 sm:ml-4">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${STATUS_COLORS[design.status]}`}>
@@ -243,7 +239,10 @@ export default function DevelopmentPage() {
       {/* Join Button for Accepted Designs */}
       {showJoinButton && (
         <div className="flex flex-col sm:flex-row gap-2">
-          <button className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+          <button
+            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200"
+            onClick={() => joinDesignTeam(design.id)}
+          >
             Join Development Team
           </button>
           <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
@@ -273,6 +272,27 @@ export default function DevelopmentPage() {
       </div>
     </div>
   )
+
+  const joinDesignTeam = async (designId: string) => {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const userId = userData?.user?.id;
+    if (!userId) {
+      alert('You must be logged in to join a team.');
+      return;
+    }
+    const { error: insertError } = await supabase
+      .from('development_team_members')
+      .insert({ design_id: designId, user_id: userId });
+    if (insertError) {
+      if (insertError.code === '23505') {
+        alert('You have already joined this project.');
+      } else {
+        alert('Failed to join project: ' + insertError.message);
+      }
+    } else {
+      alert('You have joined the project!');
+    }
+  }
 
   if (loading) {
     return (
@@ -316,52 +336,35 @@ export default function DevelopmentPage() {
           <p className="mt-2 text-gray-600">
             Join development teams, track ongoing projects, and explore completed work.
           </p>
-          
-          {/* Debug Section */}
-          <div className="mt-4 flex flex-wrap gap-2">
+
+          {/* Section Navigation Buttons */}
+          <div className="mt-6 flex flex-wrap gap-4">
             <button
-              onClick={() => setDebugMode(!debugMode)}
-              className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
+              onClick={() => setSectionFilter('join')}
+              className={`px-4 py-2 rounded-md transition ${sectionFilter === 'join' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
             >
-              {debugMode ? 'Hide Debug' : 'Show Debug'}
+              Join Now
             </button>
-            
-            {debugMode && (
-              <>
-                <button
-                  onClick={testDatabaseConnection}
-                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                >
-                  Test Database
-                </button>
-                
-                <button
-                  onClick={loadDesigns}
-                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600"
-                >
-                  Reload Designs
-                </button>
-              </>
-            )}
+            <button
+              onClick={() => setSectionFilter('ongoing')}
+              className={`px-4 py-2 rounded-md transition ${sectionFilter === 'ongoing' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+            >
+              Ongoing Projects
+            </button>
+            <button
+              onClick={() => setSectionFilter('completed')}
+              className={`px-4 py-2 rounded-md transition ${sectionFilter === 'completed' ? 'bg-gray-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+            >
+              Completed Projects
+            </button>
           </div>
           
-          {debugMode && (
-            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <h3 className="font-semibold text-yellow-800 mb-2">Debug Info:</h3>
-              <p className="text-sm text-yellow-700">
-                Check the browser console (F12) for detailed logs about the database queries.
-              </p>
-              <div className="mt-2 text-xs text-yellow-600">
-                <div>Accepted: {acceptedDesigns.length}</div>
-                <div>Ongoing: {ongoingDesigns.length}</div>
-                <div>Completed: {completedDesigns.length}</div>
-              </div>
-            </div>
-          )}
+
         </div>
 
-        {/* Join Now Section - Accepted Designs */}
-        <section className="mb-12">
+  {/* Join Now Section - Accepted Designs */}
+  { (sectionFilter === 'all' || sectionFilter === 'join') && (
+  <section id="join-now-section" className="mb-12">
           <SectionHeader
             title="Join Now"
             count={acceptedDesigns.length}
@@ -392,10 +395,11 @@ export default function DevelopmentPage() {
               ))}
             </div>
           )}
-        </section>
-
-        {/* Ongoing Projects Section */}
-        <section className="mb-12">
+  </section>
+  )}
+  {/* Ongoing Projects Section */}
+  { (sectionFilter === 'all' || sectionFilter === 'ongoing') && (
+  <section id="ongoing-section" className="mb-12">
           <SectionHeader
             title="Ongoing Projects"
             count={ongoingDesigns.length}
@@ -426,10 +430,11 @@ export default function DevelopmentPage() {
               ))}
             </div>
           )}
-        </section>
-
-        {/* Completed Projects Section */}
-        <section>
+  </section>
+  )}
+  {/* Completed Projects Section */}
+  { (sectionFilter === 'all' || sectionFilter === 'completed') && (
+  <section id="completed-section">
           <SectionHeader
             title="Completed Projects"
             count={completedDesigns.length}
@@ -461,6 +466,7 @@ export default function DevelopmentPage() {
             </div>
           )}
         </section>
+        )}
       </div>
     </div>
   )

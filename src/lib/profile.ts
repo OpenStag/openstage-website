@@ -64,7 +64,7 @@ export async function ensureUserProfile() {
 // Updated createDesign function that auto-creates profile if needed
 export async function createDesignWithProfile(designData: {
   name: string
-  type: 'web_application' | 'website'
+  type: 'website' | 'landing_page'
   pages_count: number
   figma_link?: string
   description?: string
