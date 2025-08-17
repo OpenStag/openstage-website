@@ -17,9 +17,11 @@ interface DesignWithUser extends Design {
 // Add a type for joined count
 interface DesignWithUserAndJoined extends DesignWithUser {
   joinedCount: number;
+  joinedUsers?: { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[];
 }
 
 export default function DevelopmentPage() {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [acceptedDesigns, setAcceptedDesigns] = useState<DesignWithUserAndJoined[]>([])
   const [ongoingDesigns, setOngoingDesigns] = useState<DesignWithUserAndJoined[]>([])
   const [completedDesigns, setCompletedDesigns] = useState<DesignWithUserAndJoined[]>([])
@@ -28,7 +30,10 @@ export default function DevelopmentPage() {
   const [sectionFilter, setSectionFilter] = useState<'all' | 'join' | 'ongoing' | 'completed'>('join')
 
   useEffect(() => {
-    loadDesigns()
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data?.user?.id || null);
+      loadDesigns();
+    });
   }, [])
 
   const loadDesigns = async () => {
@@ -91,48 +96,71 @@ export default function DevelopmentPage() {
         }
       }
 
-      // Fetch joined counts for all accepted designs
+      // Fetch joined counts and user info for all accepted designs
       const acceptedDesignsRaw = designsWithUsers.filter(d => d.status === 'accepted')
       const joinedCounts: Record<string, number> = {}
+      const joinedUsersMap: Record<string, { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[]> = {};
       if (acceptedDesignsRaw.length > 0) {
-        // Supabase doesn't support .group, so fetch all and count in JS
+        // Get all joined members for accepted designs, including user info, for ALL users
         const { data: joinedRows, error: joinedError } = await supabase
           .from('development_team_members')
-          .select('design_id, user_id')
+          .select('design_id, user_id, profiles:profiles!user_id(email,first_name,last_name,username)')
           .in('design_id', acceptedDesignsRaw.map(d => d.id))
         if (!joinedError && joinedRows) {
           for (const row of joinedRows) {
             if (!joinedCounts[row.design_id]) joinedCounts[row.design_id] = 0;
             joinedCounts[row.design_id]++;
+            if (!joinedUsersMap[row.design_id]) joinedUsersMap[row.design_id] = [];
+            // row.profiles may be an array (Supabase join)
+            const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+            joinedUsersMap[row.design_id].push({
+              user_id: row.user_id,
+              email: profile?.email || '',
+              first_name: profile?.first_name,
+              last_name: profile?.last_name,
+              username: profile?.username
+            });
           }
         }
       }
-        const accepted: DesignWithUserAndJoined[] = acceptedDesignsRaw.map(d => ({
-          ...d,
-          joinedCount: joinedCounts[d.id] || 0
-        }))
+      const accepted: DesignWithUserAndJoined[] = acceptedDesignsRaw.map(d => ({
+        ...d,
+        joinedCount: joinedCounts[d.id] || 0,
+        joinedUsers: joinedUsersMap[d.id] || []
+      }))
   
         // Separate designs by status
         const ongoingRaw = designsWithUsers.filter(d => d.status === 'in_development')
         const completedRaw = designsWithUsers.filter(d => d.status === 'completed')
   
-        // For ongoing/completed, fetch joined counts as well (optional, fallback to 0 if not found)
+
+        // For ongoing/completed, fetch joined counts AND joined users (for filtering and display)
         const allOngoingCompleted = [...ongoingRaw, ...completedRaw]
         let joinedCountsAll: Record<string, number> = {}
+        let joinedUsersMapAll: Record<string, { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[]> = {};
         if (allOngoingCompleted.length > 0) {
           const { data: joinedRows, error: joinedError } = await supabase
             .from('development_team_members')
-            .select('design_id, user_id')
+            .select('design_id, user_id, profiles:profiles!user_id(email,first_name,last_name,username)')
             .in('design_id', allOngoingCompleted.map(d => d.id))
           if (!joinedError && joinedRows) {
             for (const row of joinedRows) {
               if (!joinedCountsAll[row.design_id]) joinedCountsAll[row.design_id] = 0;
               joinedCountsAll[row.design_id]++;
+              if (!joinedUsersMapAll[row.design_id]) joinedUsersMapAll[row.design_id] = [];
+              const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+              joinedUsersMapAll[row.design_id].push({
+                user_id: row.user_id,
+                email: profile?.email || '',
+                first_name: profile?.first_name,
+                last_name: profile?.last_name,
+                username: profile?.username
+              });
             }
           }
         }
-        const ongoing: DesignWithUserAndJoined[] = ongoingRaw.map(d => ({ ...d, joinedCount: joinedCountsAll[d.id] || 0 }))
-        const completed: DesignWithUserAndJoined[] = completedRaw.map(d => ({ ...d, joinedCount: joinedCountsAll[d.id] || 0 }))
+        const ongoing: DesignWithUserAndJoined[] = ongoingRaw.map(d => ({ ...d, joinedCount: joinedCountsAll[d.id] || 0, joinedUsers: joinedUsersMapAll[d.id] || [] }))
+        const completed: DesignWithUserAndJoined[] = completedRaw.map(d => ({ ...d, joinedCount: joinedCountsAll[d.id] || 0, joinedUsers: joinedUsersMapAll[d.id] || [] }))
   
         setAcceptedDesigns(accepted)
         setOngoingDesigns(ongoing)
@@ -180,78 +208,95 @@ export default function DevelopmentPage() {
     return user.email
   }
 
-  const DesignCard = ({ design, showJoinButton = false }: { design: DesignWithUserAndJoined, showJoinButton?: boolean }) => (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{design.name}</h3>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-2">
-            <span>{TYPE_LABELS[design.type]}</span>
-            <span>•</span>
-            <span>{design.pages_count} page{design.pages_count > 1 ? 's' : ''}</span>
+  const DesignCard = ({ design, showJoinButton = false }: { design: DesignWithUserAndJoined, showJoinButton?: boolean }) => {
+    const isFull = design.joinedCount >= design.pages_count;
+    return (
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{design.name}</h3>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-2">
+              <span>{TYPE_LABELS[design.type]}</span>
+              <span>•</span>
+              <span>{design.pages_count} page{design.pages_count > 1 ? 's' : ''}</span>
+            </div>
+            {/* Team info */}
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-700 mb-2">
+              <span>Total allowed: <b>{design.pages_count}</b></span>
+              <span>Joined: <b>{design.joinedCount}</b></span>
+              <span>Remaining: <b>{Math.max(0, design.pages_count - design.joinedCount)}</b></span>
+            </div>
+            {/* Show joined users if any */}
+            {design.joinedUsers && design.joinedUsers.length > 0 && (
+              <div className="mt-1 text-xs text-gray-600">
+                <span className="font-semibold">Team Members:</span>
+                <ul className="list-disc ml-5">
+                  {design.joinedUsers.map((user) => (
+                    <li key={user.user_id}>
+                      {user.first_name || user.last_name ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : user.username || user.email}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-          {/* Team info */}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-700 mb-2">
-            <span>Total allowed: <b>{design.pages_count}</b></span>
-            <span>Joined: <b>{design.joinedCount}</b></span>
-            <span>Remaining: <b>{Math.max(0, design.pages_count - design.joinedCount)}</b></span>
+          <div className="mt-3 sm:mt-0 sm:ml-4">
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${STATUS_COLORS[design.status]}`}>
+              {STATUS_LABELS[design.status]}
+            </span>
           </div>
         </div>
-        <div className="mt-3 sm:mt-0 sm:ml-4">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${STATUS_COLORS[design.status]}`}>
-            {STATUS_LABELS[design.status]}
-          </span>
-        </div>
+
+        {/* Description */}
+        {design.description && (
+          <p className="text-gray-700 mb-4 text-sm leading-relaxed">{design.description}</p>
+        )}
+
+        {/* Figma Link */}
+        {design.figma_link && (
+          <div className="mb-4">
+            <a
+              href={design.figma_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm transition-colors"
+            >
+              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 2H8.4c-1.9 0-3.4 1.5-3.4 3.4v13.1c0 1.9 1.5 3.4 3.4 3.4h.9c1.9 0 3.4-1.5 3.4-3.4V16h3.3c3.7 0 6.7-3 6.7-6.7S19.7 2.6 16 2.6L15.5 2zm0 9.3H12v3.4c0 .9-.7 1.7-1.7 1.7h-.9c-.9 0-1.7-.7-1.7-1.7V5.4c0-.9.7-1.7 1.7-1.7h7.1c2.8 0 5 2.2 5 5S18.3 11.3 15.5 11.3z"/>
+              </svg>
+              View Design in Figma
+            </a>
+          </div>
+        )}
+
+        {/* Admin Notes */}
+        {design.admin_notes && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800">
+              <strong>Project Notes:</strong> {design.admin_notes}
+            </p>
+          </div>
+        )}
+
+        {/* Join Button for Accepted Designs */}
+        {showJoinButton && (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              className={`flex-1 ${isFull ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200`}
+              onClick={() => !isFull && joinDesignTeam(design.id)}
+              disabled={isFull}
+            >
+              {isFull ? 'Team Full' : 'Join Development Team'}
+            </button>
+            <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+              View Details
+            </button>
+          </div>
+        )}
       </div>
-
-      {/* Description */}
-      {design.description && (
-        <p className="text-gray-700 mb-4 text-sm leading-relaxed">{design.description}</p>
-      )}
-
-      {/* Figma Link */}
-      {design.figma_link && (
-        <div className="mb-4">
-          <a
-            href={design.figma_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm transition-colors"
-          >
-            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M15.5 2H8.4c-1.9 0-3.4 1.5-3.4 3.4v13.1c0 1.9 1.5 3.4 3.4 3.4h.9c1.9 0 3.4-1.5 3.4-3.4V16h3.3c3.7 0 6.7-3 6.7-6.7S19.7 2.6 16 2.6L15.5 2zm0 9.3H12v3.4c0 .9-.7 1.7-1.7 1.7h-.9c-.9 0-1.7-.7-1.7-1.7V5.4c0-.9.7-1.7 1.7-1.7h7.1c2.8 0 5 2.2 5 5S18.3 11.3 15.5 11.3z"/>
-            </svg>
-            View Design in Figma
-          </a>
-        </div>
-      )}
-
-      {/* Admin Notes */}
-      {design.admin_notes && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-800">
-            <strong>Project Notes:</strong> {design.admin_notes}
-          </p>
-        </div>
-      )}
-
-      {/* Join Button for Accepted Designs */}
-      {showJoinButton && (
-        <div className="flex flex-col sm:flex-row gap-2">
-          <button
-            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200"
-            onClick={() => joinDesignTeam(design.id)}
-          >
-            Join Development Team
-          </button>
-          <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-            View Details
-          </button>
-        </div>
-      )}
-    </div>
-  )
+    );
+  };
 
   const SectionHeader = ({ title, count, description, icon }: { 
     title: string, 
@@ -274,6 +319,16 @@ export default function DevelopmentPage() {
   )
 
   const joinDesignTeam = async (designId: string) => {
+    // Find the design object to check joinedCount and pages_count
+    const design = acceptedDesigns.find(d => d.id === designId) || ongoingDesigns.find(d => d.id === designId);
+    if (!design) {
+      alert('Project not found.');
+      return;
+    }
+    if (design.joinedCount >= design.pages_count) {
+      alert('This project team is already full.');
+      return;
+    }
     const { data: userData, error: userError } = await supabase.auth.getUser();
     const userId = userData?.user?.id;
     if (!userId) {
@@ -402,7 +457,7 @@ export default function DevelopmentPage() {
   <section id="ongoing-section" className="mb-12">
           <SectionHeader
             title="Ongoing Projects"
-            count={ongoingDesigns.length}
+            count={currentUserId ? ongoingDesigns.filter(design => design.joinedUsers?.some(u => u.user_id === currentUserId)).length : 0}
             description="These projects are currently under development by our teams."
             icon={
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -413,7 +468,7 @@ export default function DevelopmentPage() {
             }
           />
 
-          {ongoingDesigns.length === 0 ? (
+          {currentUserId && ongoingDesigns.filter(design => design.joinedUsers?.some(u => u.user_id === currentUserId)).length === 0 ? (
             <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
               <div className="text-gray-400 mb-4">
                 <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -421,11 +476,11 @@ export default function DevelopmentPage() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Ongoing Projects</h3>
-              <p className="text-gray-600">There are currently no projects in development.</p>
+              <p className="text-gray-600">You have not joined any ongoing projects.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {ongoingDesigns.map((design) => (
+              {ongoingDesigns.filter(design => design.joinedUsers?.some(u => u.user_id === currentUserId)).map((design) => (
                 <DesignCard key={design.id} design={design} />
               ))}
             </div>
@@ -448,7 +503,7 @@ export default function DevelopmentPage() {
             }
           />
 
-          {completedDesigns.length === 0 ? (
+          {currentUserId && completedDesigns.filter(design => design.joinedUsers?.some(u => u.user_id === currentUserId)).length === 0 ? (
             <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
               <div className="text-gray-400 mb-4">
                 <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -456,11 +511,11 @@ export default function DevelopmentPage() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Completed Projects</h3>
-              <p className="text-gray-600">No projects have been completed yet.</p>
+              <p className="text-gray-600">You have not completed any projects yet.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {completedDesigns.map((design) => (
+              {completedDesigns.filter(design => design.joinedUsers?.some(u => u.user_id === currentUserId)).map((design) => (
                 <DesignCard key={design.id} design={design} />
               ))}
             </div>
