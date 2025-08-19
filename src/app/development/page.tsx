@@ -138,7 +138,7 @@ export default function DevelopmentPage() {
         const allOngoingCompleted = [...ongoingRaw, ...completedRaw]
         let joinedCountsAll: Record<string, number> = {}
         let joinedUsersMapAll: Record<string, { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[]> = {};
-        if (allOngoingCompleted.length > 0) {
+        if (allOngoingCompleted.length > 0) { 
           const { data: joinedRows, error: joinedError } = await supabase
             .from('development_team_members')
             .select('design_id, user_id, profiles:profiles!user_id(email,first_name,last_name,username)')
@@ -211,25 +211,25 @@ export default function DevelopmentPage() {
   const DesignCard = ({ design, showJoinButton = false }: { design: DesignWithUserAndJoined, showJoinButton?: boolean }) => {
     const isFull = design.joinedCount >= design.pages_count;
     return (
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow max-w-md">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{design.name}</h3>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-2">
+            <h3 className="text-lg font-semibold text-white mb-2">{design.name}</h3>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-whit mb-2">
               <span>{TYPE_LABELS[design.type]}</span>
               <span>•</span>
               <span>{design.pages_count} page{design.pages_count > 1 ? 's' : ''}</span>
             </div>
             {/* Team info */}
-            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-700 mb-2">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-white mb-2">
               <span>Total allowed: <b>{design.pages_count}</b></span>
               <span>Joined: <b>{design.joinedCount}</b></span>
               <span>Remaining: <b>{Math.max(0, design.pages_count - design.joinedCount)}</b></span>
             </div>
             {/* Show joined users if any */}
             {design.joinedUsers && design.joinedUsers.length > 0 && (
-              <div className="mt-1 text-xs text-gray-600">
+              <div className="mt-1 text-xs text-white">
                 <span className="font-semibold">Team Members:</span>
                 <ul className="list-disc ml-5">
                   {design.joinedUsers.map((user) => (
@@ -308,12 +308,12 @@ export default function DevelopmentPage() {
       <div>
         <div className="flex items-center">
           {icon}
-          <h2 className="text-2xl font-bold text-gray-900 ml-2">{title}</h2>
+          <h2 className="text-2xl font-bold text-white ml-2">{title}</h2>
           <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
             {count}
           </span>
         </div>
-        <p className="text-gray-600 mt-1">{description}</p>
+        <p className="text-white mt-1">{description}</p>
       </div>
     </div>
   )
@@ -383,7 +383,7 @@ export default function DevelopmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900  py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
@@ -413,8 +413,6 @@ export default function DevelopmentPage() {
               Completed Projects
             </button>
           </div>
-          
-
         </div>
 
   {/* Join Now Section - Accepted Designs */}
@@ -469,7 +467,7 @@ export default function DevelopmentPage() {
           />
 
           {currentUserId && ongoingDesigns.filter(design => design.joinedUsers?.some(u => u.user_id === currentUserId)).length === 0 ? (
-            <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border-2 max-w-md border-dashed border-gray-300 p-8 text-center">
               <div className="text-gray-400 mb-4">
                 <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
@@ -492,7 +490,7 @@ export default function DevelopmentPage() {
   <section id="completed-section">
           <SectionHeader
             title="Completed Projects"
-            count={completedDesigns.length}
+            count={currentUserId ? completedDesigns.filter(design => design.joinedUsers?.some(u => u.user_id === currentUserId)).length : 0}
             description="These projects have been successfully completed by our development teams."
             icon={
               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
