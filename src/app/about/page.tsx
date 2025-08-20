@@ -131,80 +131,15 @@ export default function About() {
               passion to make our mission a reality.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">AF</span>
+            <div className="text-center">
+              <div className="w-full max-w-4xl h-49 sm:h-64 md:h-80 lg:h-113 mx-auto mb-4 overflow-hidden bg-gray-200 rounded-lg">
+                <img 
+                  src="team1.jpg" 
+                  alt="OpenStage Team" 
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Alex Foster</h3>
-              <p className="text-blue-600 font-medium mb-3">Founder & Lead Developer</p>
-              <p className="text-gray-600 text-sm">
-                Full-stack developer with 8+ years of experience. Passionate about bridging the gap between 
-                education and industry through practical projects.
-              </p>
             </div>
-            
-            <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">SM</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Sarah Martinez</h3>
-              <p className="text-green-600 font-medium mb-3">Education Director</p>
-              <p className="text-gray-600 text-sm">
-                Former computer science professor with expertise in curriculum development and student mentorship. 
-                Dedicated to creating effective learning experiences.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">MK</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Michael Kim</h3>
-              <p className="text-purple-600 font-medium mb-3">Technical Mentor</p>
-              <p className="text-gray-600 text-sm">
-                Senior software engineer at a Fortune 500 company. Volunteers his time to guide students 
-                through complex technical challenges and career development.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 bg-gradient-to-br from-red-400 to-red-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">EP</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Emily Park</h3>
-              <p className="text-red-600 font-medium mb-3">Community Manager</p>
-              <p className="text-gray-600 text-sm">
-                Digital marketing professional who manages our community outreach, social media presence, 
-                and partnership development with educational institutions.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">DJ</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">David Johnson</h3>
-              <p className="text-indigo-600 font-medium mb-3">Project Coordinator</p>
-              <p className="text-gray-600 text-sm">
-                Experienced project manager who ensures our initiatives run smoothly and students get 
-                the most out of their hands-on learning experiences.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">LC</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Lisa Chen</h3>
-              <p className="text-teal-600 font-medium mb-3">UX/UI Designer</p>
-              <p className="text-gray-600 text-sm">
-                Creative designer who ensures our projects not only function well but also provide 
-                excellent user experiences. Mentors students in design thinking and user research.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
