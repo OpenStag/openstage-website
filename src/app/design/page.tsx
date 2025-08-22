@@ -3,20 +3,16 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import type { User } from '@supabase/supabase-js'
 import { 
-  createDesign, 
   getUserDesigns, 
-  STATUS_LABELS, 
-  STATUS_COLORS, 
-  TYPE_LABELS,
-  type CreateDesignData,
   type DesignWithHistory 
 } from '@/lib/designs'
 import { createDesignWithProfile } from '@/lib/profile'
+import router from 'next/router'
 
 export default function DesignPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [designs, setDesigns] = useState<DesignWithHistory[]>([])

@@ -44,7 +44,7 @@ export default function Contact() {
               </span>
             </h1>
             <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto">
-              Ready to join our community or have questions? We'd love to hear from you. 
+              Ready to join our community or have questions? We&apos;d love to hear from you. 
               Reach out for collaboration, mentorship, or any inquiries.
             </p>
           </div>
@@ -115,7 +115,7 @@ export default function Contact() {
                     <option value="">Select a subject</option>
                     <option value="volunteer">I want to volunteer</option>
                     <option value="mentor">I want to become a mentor</option>
-                    <option value="student">I'm a student interested in joining</option>
+                    <option value="student">I&apos;m a student interested in joining</option>
                     <option value="partnership">Partnership opportunity</option>
                     <option value="collaboration">Project collaboration</option>
                     <option value="other">Other inquiry</option>
@@ -264,7 +264,7 @@ export default function Contact() {
               </h3>
               <p className="text-gray-600">
                 Students can join OpenStage by applying through our contact form. We welcome learners at all levels, 
-                from beginners to advanced students. You'll be matched with projects that align with your skills and interests, 
+                from beginners to advanced students. You&apos;ll be matched with projects that align with your skills and interests, 
                 and paired with experienced mentors who will guide you through real-world challenges.
               </p>
             </div>
@@ -274,7 +274,7 @@ export default function Contact() {
                 What requirements are there to become a mentor?
               </h3>
               <p className="text-gray-600">
-                We're looking for professionals with at least 2-3 years of industry experience who are passionate about 
+                We&apos;re looking for professionals with at least 2-3 years of industry experience who are passionate about 
                 helping others grow. Mentors should be able to commit to regular check-ins with students and provide 
                 guidance on both technical and career development aspects. All skill levels and backgrounds are welcome.
               </p>
@@ -286,7 +286,7 @@ export default function Contact() {
               </h3>
               <p className="text-gray-600">
                 OpenStage is completely free for all participants. As a non-profit organization, our mission is to make 
-                real-world tech experience accessible to everyone, regardless of their financial situation. We're supported 
+                real-world tech experience accessible to everyone, regardless of their financial situation. We&apos;re supported 
                 by donations, grants, and the generous time contributions of our volunteer mentors.
               </p>
             </div>
@@ -323,8 +323,8 @@ export default function Contact() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Whether you're a student looking to gain experience or a professional wanting to give back, 
-            we'd love to have you join our community.
+            Whether you&apos;re a student looking to gain experience or a professional wanting to give back, 
+            we&apos;d love to have you join our community.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a

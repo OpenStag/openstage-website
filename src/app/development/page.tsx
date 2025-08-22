@@ -136,8 +136,8 @@ export default function DevelopmentPage() {
 
         // For ongoing/completed, fetch joined counts AND joined users (for filtering and display)
         const allOngoingCompleted = [...ongoingRaw, ...completedRaw]
-        let joinedCountsAll: Record<string, number> = {}
-        let joinedUsersMapAll: Record<string, { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[]> = {};
+        const joinedCountsAll: Record<string, number> = {}
+        const joinedUsersMapAll: Record<string, { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[]> = {};
         if (allOngoingCompleted.length > 0) { 
           const { data: joinedRows, error: joinedError } = await supabase
             .from('development_team_members')

@@ -253,11 +253,11 @@ export default function TestDesignPage() {
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-semibold text-blue-800 mb-2">Instructions:</h3>
           <ol className="text-sm text-blue-700 space-y-1">
-            <li>1. Make sure you're logged in to your account</li>
-            <li>2. Run "Test Authentication" first</li>
-            <li>3. Then run "Test Database" to check table access</li>
-            <li>4. Run "Test RLS" to check security policies</li>
-            <li>5. Finally run "Test Insert" to see the actual error</li>
+            <li>1. Make sure you&apos;re logged in to your account</li>
+            <li>2. Run &apos;&apos;Test Authentication&apos;&apos; first</li>
+            <li>3. Then run &apos;&apos;Test Database&apos;&apos; to check table access</li>
+            <li>4. Run &apos;&apos;Test RLS&apos;&apos; to check security policies</li>
+            <li>5. Finally run &apos;&apos;Test Insert&apos;&apos; to see the actual error</li>
           </ol>
         </div>
       </div>

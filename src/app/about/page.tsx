@@ -12,7 +12,7 @@ export default function About() {
               </span>
             </h1>
             <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto">
-              Learn about our story, values, and the passionate team behind OpenStage's mission to transform 
+              Learn about our story, values, and the passionate team behind OpenStage&apos;s mission to transform 
               tech education through real-world experience.
             </p>
           </div>
@@ -28,7 +28,7 @@ export default function About() {
             </h2>
             <div className="prose prose-lg max-w-none text-gray-600 dark:text-gray-300">
               <p className="text-lg leading-relaxed mb-6">
-                OpenStage was born from a simple yet powerful observation: there's a significant gap between 
+                OpenStage was born from a simple yet powerful observation: there&apos;s a significant gap between 
                 what students learn in classrooms and what they need to succeed in the real world of technology. 
                 Too many talented individuals graduate with theoretical knowledge but lack the practical experience 
                 that employers seek.
@@ -151,7 +151,7 @@ export default function About() {
               Our Impact
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Numbers that reflect the positive change we're creating in the tech community.
+              Numbers that reflect the positive change we&apos;re creating in the tech community.
             </p>
           </div>
           

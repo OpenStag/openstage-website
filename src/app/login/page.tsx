@@ -67,8 +67,8 @@ export default function Login() {
           router.push('/');
         }, 1500);
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -86,8 +86,8 @@ export default function Login() {
       } else {
         setSuccess('Redirecting to Google for authentication...');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google. Please try again.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to sign in with Google. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -260,7 +260,7 @@ export default function Login() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
                 Sign up here
               </Link>

@@ -62,8 +62,8 @@ export default function Signup() {
           router.push('/login?message=signup_success');
         }, 2000);
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -78,8 +78,8 @@ export default function Signup() {
       if (googleError) {
         setError(googleError);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign up with Google');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to sign up with Google');
     } finally {
       setLoading(false);
     }

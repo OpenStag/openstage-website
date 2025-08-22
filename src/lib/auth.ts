@@ -31,8 +31,8 @@ export async function signUp(data: SignUpData) {
     }
 
     return { user: authData.user, session: authData.session, error: null }
-  } catch (error: any) {
-    return { user: null, session: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, session: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
 }
 
@@ -49,10 +49,10 @@ export async function signIn(data: SignInData) {
     }
 
     return { user: authData.user, session: authData.session, error: null }
-  } catch (error: any) {
-    return { user: null, session: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, session: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
-}
+statu}
 
 // Sign out the current user
 export async function signOut() {
@@ -62,8 +62,8 @@ export async function signOut() {
       throw error
     }
     return { error: null }
-  } catch (error: any) {
-    return { error: error.message }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
 }
 
@@ -75,8 +75,8 @@ export async function getCurrentUser() {
       throw error
     }
     return { user, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
 }
 
@@ -94,8 +94,8 @@ export async function getUserProfile(userId: string) {
     }
 
     return { profile: data, error: null }
-  } catch (error: any) {
-    return { profile: null, error: error.message }
+  } catch (error: unknown) {
+    return { profile: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
 }
 
@@ -125,8 +125,8 @@ export async function updateUserProfile(userId: string, updates: Partial<{
     }
 
     return { profile: data, error: null }
-  } catch (error: any) {
-    return { profile: null, error: error.message }
+  } catch (error: unknown) {
+    return { profile: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
 }
 
@@ -145,8 +145,8 @@ export async function signInWithGoogle() {
     }
 
     return { data, error: null }
-  } catch (error: any) {
-    return { data: null, error: error.message }
+  } catch (error: unknown) {
+    return { data: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
 }
 
@@ -165,7 +165,7 @@ export async function signInWithGitHub() {
     }
 
     return { data, error: null }
-  } catch (error: any) {
-    return { data: null, error: error.message }
+  } catch (error: unknown) {
+    return { data: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
 }
