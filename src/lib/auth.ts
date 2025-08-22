@@ -52,7 +52,7 @@ export async function signIn(data: SignInData) {
   } catch (error: unknown) {
     return { user: null, session: null, error: error instanceof Error ? error.message : 'An unknown error occurred' }
   }
-statu}
+}
 
 // Sign out the current user
 export async function signOut() {
