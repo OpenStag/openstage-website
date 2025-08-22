@@ -27,6 +27,12 @@ export default function Navigation() {
             <Link href="/about" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
               About
             </Link>
+            <Link href="/design" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+              Design
+            </Link>
+            <Link href="/development" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+              Development
+            </Link>
             <Link href="/contact" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
               Contact Us
             </Link>
@@ -72,6 +78,20 @@ export default function Navigation() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
+              </Link>
+              <Link
+                href="/design"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Design
+              </Link>
+              <Link
+                href="/development"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Development
               </Link>
               <Link
                 href="/contact"

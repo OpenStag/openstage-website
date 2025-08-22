@@ -56,3 +56,40 @@ export interface ContactMessage {
   status: 'new' | 'in_progress' | 'resolved' | 'closed'
   created_at: string
 }
+
+export interface Design {
+  id: string
+  user_id: string
+  name: string
+  type: 'web_application' | 'website'
+  pages_count: number
+  figma_link?: string
+  description?: string
+  status: 'pending' | 'accepted' | 'in_development' | 'completed' | 'rejected'
+  created_at: string
+  updated_at: string
+  accepted_at?: string
+  development_started_at?: string
+  completed_at?: string
+  rejected_at?: string
+  admin_notes?: string
+  reviewed_by?: string
+}
+
+export interface DesignStatusHistory {
+  id: string
+  design_id: string
+  status: string
+  changed_by: string
+  notes?: string
+  created_at: string
+}
+
+export interface DesignComment {
+  id: string
+  design_id: string
+  user_id: string
+  comment: string
+  is_admin_comment: boolean
+  created_at: string
+}

@@ -175,7 +175,7 @@ export default function Home() {
                 New Student Mentorship Program Launched
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                We've expanded our reach with a dedicated mentorship program connecting experienced professionals 
+                We&apos;ve expanded our reach with a dedicated mentorship program connecting experienced professionals 
                 with aspiring developers. Over 50 students have already joined our community!
               </p>
             </div>
