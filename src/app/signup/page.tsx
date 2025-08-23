@@ -56,7 +56,7 @@ export default function Signup() {
       }
 
       if (user) {
-        setSuccess('Account created successfully! Redirecting to login page...');
+        setSuccess('Verify Your Email!');
         // Redirect to login with success message
         setTimeout(() => {
           router.push('/login?message=signup_success');

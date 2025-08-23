@@ -17,7 +17,15 @@ interface DesignWithUser extends Design {
 // Add a type for joined count
 interface DesignWithUserAndJoined extends DesignWithUser {
   joinedCount: number;
-  joinedUsers?: { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[];
+  joinedUsers?: { 
+    user_id: string; 
+    email: string; 
+    first_name?: string; 
+    last_name?: string; 
+    username?: string;
+    role?: string;
+    joined_at?: string;
+  }[];
 }
 
 export default function DevelopmentPage() {
@@ -99,28 +107,57 @@ export default function DevelopmentPage() {
       // Fetch joined counts and user info for all accepted designs
       const acceptedDesignsRaw = designsWithUsers.filter(d => d.status === 'accepted')
       const joinedCounts: Record<string, number> = {}
-      const joinedUsersMap: Record<string, { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[]> = {};
+      const joinedUsersMap: Record<string, { 
+        user_id: string; 
+        email: string; 
+        first_name?: string; 
+        last_name?: string; 
+        username?: string;
+        role?: string;
+        joined_at?: string;
+      }[]> = {};
       if (acceptedDesignsRaw.length > 0) {
         // Get all joined members for accepted designs, including user info, for ALL users
         const { data: joinedRows, error: joinedError } = await supabase
           .from('development_team_members')
-          .select('design_id, user_id, profiles:profiles!user_id(email,first_name,last_name,username)')
+          .select(`
+            design_id, 
+            user_id, 
+            joined_at,
+            role,
+            profiles!user_id (
+              email,
+              first_name,
+              last_name,
+              username
+            )
+          `)
           .in('design_id', acceptedDesignsRaw.map(d => d.id))
+          .eq('is_active', true)
+          .order('joined_at', { ascending: true });
+          
+        console.log('Joined rows for accepted designs:', joinedRows); // Debug log
+        
         if (!joinedError && joinedRows) {
           for (const row of joinedRows) {
             if (!joinedCounts[row.design_id]) joinedCounts[row.design_id] = 0;
             joinedCounts[row.design_id]++;
             if (!joinedUsersMap[row.design_id]) joinedUsersMap[row.design_id] = [];
-            // row.profiles may be an array (Supabase join)
+            
+            // Handle profile data properly - it might be an array or object
             const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
             joinedUsersMap[row.design_id].push({
               user_id: row.user_id,
               email: profile?.email || '',
-              first_name: profile?.first_name,
-              last_name: profile?.last_name,
-              username: profile?.username
+              first_name: profile?.first_name || '',
+              last_name: profile?.last_name || '',
+              username: profile?.username || '',
+              role: row.role || 'developer',
+              joined_at: row.joined_at
             });
           }
+        } else if (joinedError) {
+          console.error('Error fetching joined users for accepted designs:', joinedError);
         }
       }
       const accepted: DesignWithUserAndJoined[] = acceptedDesignsRaw.map(d => ({
@@ -137,12 +174,36 @@ export default function DevelopmentPage() {
         // For ongoing/completed, fetch joined counts AND joined users (for filtering and display)
         const allOngoingCompleted = [...ongoingRaw, ...completedRaw]
         const joinedCountsAll: Record<string, number> = {}
-        const joinedUsersMapAll: Record<string, { user_id: string; email: string; first_name?: string; last_name?: string; username?: string }[]> = {};
+        const joinedUsersMapAll: Record<string, { 
+          user_id: string; 
+          email: string; 
+          first_name?: string; 
+          last_name?: string; 
+          username?: string;
+          role?: string;
+          joined_at?: string;
+        }[]> = {};
         if (allOngoingCompleted.length > 0) { 
           const { data: joinedRows, error: joinedError } = await supabase
             .from('development_team_members')
-            .select('design_id, user_id, profiles:profiles!user_id(email,first_name,last_name,username)')
+            .select(`
+              design_id, 
+              user_id, 
+              joined_at,
+              role,
+              profiles!user_id (
+                email,
+                first_name,
+                last_name,
+                username
+              )
+            `)
             .in('design_id', allOngoingCompleted.map(d => d.id))
+            .eq('is_active', true)
+            .order('joined_at', { ascending: true });
+            
+          console.log('Joined rows for ongoing/completed designs:', joinedRows); // Debug log
+          
           if (!joinedError && joinedRows) {
             for (const row of joinedRows) {
               if (!joinedCountsAll[row.design_id]) joinedCountsAll[row.design_id] = 0;
@@ -152,11 +213,15 @@ export default function DevelopmentPage() {
               joinedUsersMapAll[row.design_id].push({
                 user_id: row.user_id,
                 email: profile?.email || '',
-                first_name: profile?.first_name,
-                last_name: profile?.last_name,
-                username: profile?.username
+                first_name: profile?.first_name || '',
+                last_name: profile?.last_name || '',
+                username: profile?.username || '',
+                role: row.role || 'developer',
+                joined_at: row.joined_at
               });
             }
+          } else if (joinedError) {
+            console.error('Error fetching joined users for ongoing/completed designs:', joinedError);
           }
         }
         const ongoing: DesignWithUserAndJoined[] = ongoingRaw.map(d => ({ ...d, joinedCount: joinedCountsAll[d.id] || 0, joinedUsers: joinedUsersMapAll[d.id] || [] }))
@@ -229,15 +294,34 @@ export default function DevelopmentPage() {
             </div>
             {/* Show joined users if any */}
             {design.joinedUsers && design.joinedUsers.length > 0 && (
-              <div className="mt-1 text-xs text-white">
+              <div className="mt-2 text-xs text-white">
                 <span className="font-semibold">Team Members:</span>
-                <ul className="list-disc ml-5">
-                  {design.joinedUsers.map((user) => (
-                    <li key={user.user_id}>
-                      {user.first_name || user.last_name ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : user.username || user.email}
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-1 space-y-1">
+                  {design.joinedUsers.map((user, index) => {
+                    const displayName = user.first_name && user.last_name 
+                      ? `${user.first_name} ${user.last_name}`.trim()
+                      : user.first_name || user.last_name || user.username || user.email.split('@')[0];
+                    
+                    return (
+                      <div key={user.user_id} className="flex items-center justify-between bg-white/10 rounded px-2 py-1">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                          {displayName}
+                        </span>
+                        {user.role && (
+                          <span className="text-xs opacity-75 capitalize">
+                            {user.role}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {design.joinedUsers.length < design.pages_count && (
+                  <div className="mt-1 text-xs opacity-75">
+                    💡 {design.pages_count - design.joinedUsers.length} more spot{design.pages_count - design.joinedUsers.length !== 1 ? 's' : ''} available
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -318,6 +402,38 @@ export default function DevelopmentPage() {
     </div>
   )
 
+  const debugTeamMembers = async () => {
+    try {
+      console.log('🔍 Debug: Checking development_team_members table...');
+      
+      // Get all team members with user details
+      const { data: allMembers, error } = await supabase
+        .from('development_team_members')
+        .select(`
+          *,
+          profiles!user_id (
+            email,
+            first_name,
+            last_name,
+            username
+          ),
+          designs!design_id (
+            name,
+            status
+          )
+        `)
+        .eq('is_active', true);
+        
+      console.log('All team members:', allMembers);
+      if (error) console.error('Error:', error);
+      
+      alert(`Found ${allMembers?.length || 0} team members. Check console for details.`);
+    } catch (error) {
+      console.error('Debug error:', error);
+      alert('Error checking team members. Check console.');
+    }
+  };
+
   const joinDesignTeam = async (designId: string) => {
     // Find the design object to check joinedCount and pages_count
     const design = acceptedDesigns.find(d => d.id === designId) || ongoingDesigns.find(d => d.id === designId);
@@ -329,29 +445,66 @@ export default function DevelopmentPage() {
       alert('This project team is already full.');
       return;
     }
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    const userId = userData?.user?.id;
-    if (!userId) {
-      alert('You must be logged in to join a team.');
-      return;
-    }
-    const { error: insertError } = await supabase
-      .from('development_team_members')
-      .insert({ design_id: designId, user_id: userId });
-    if (insertError) {
-      if (insertError.code === '23505') {
-        alert('You have already joined this project.');
-      } else {
-        alert('Failed to join project: ' + insertError.message);
+    
+    try {
+      // First, ensure the user has a profile in the profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', currentUserId)
+        .single();
+
+      if (profileError || !profileData) {
+        // Create profile if it doesn't exist
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user) {
+          const { error: createProfileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: currentUserId,
+              email: userData.user.email || '',
+              first_name: userData.user.user_metadata?.first_name || '',
+              last_name: userData.user.user_metadata?.last_name || '',
+              username: userData.user.user_metadata?.username || userData.user.email?.split('@')[0] || ''
+            });
+          
+          if (createProfileError) {
+            alert('Failed to create user profile: ' + createProfileError.message);
+            return;
+          }
+        }
       }
-    } else {
-      alert('You have joined the project!');
+
+      // Now try to join the team
+      const { error: insertError } = await supabase
+        .from('development_team_members')
+        .insert({ 
+          design_id: designId, 
+          user_id: currentUserId,
+          joined_at: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        if (insertError.code === '23505') {
+          alert('You have already joined this project.');
+        } else if (insertError.code === '42P01') {
+          alert('Development team feature is not yet available. The database table needs to be created.');
+        } else {
+          alert('Failed to join project: ' + insertError.message);
+        }
+      } else {
+        alert('You have joined the project!');
+        loadDesigns(); // Refresh the data
+      }
+    } catch (error) {
+      console.error('Error joining team:', error);
+      alert('An unexpected error occurred while joining the project.');
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading development projects...</p>

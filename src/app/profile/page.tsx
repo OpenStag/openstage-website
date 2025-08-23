@@ -52,10 +52,10 @@ const STATUS_LABELS = {
 
 const STATUS_COLORS = {
   pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  accepted: "bg-green-100 text-green-800 border-green-200",
+  accepted: "bg-blue-100 text-blue-800 border-blue-200",
   in_development: "bg-blue-100 text-blue-800 border-blue-200",
-  completed: "bg-purple-100 text-purple-800 border-purple-200",
-  rejected: "bg-red-100 text-red-800 border-red-200",
+  completed: "bg-blue-100 text-blue-800 border-blue-200",
+  rejected: "bg-yellow-100 text-yellow-800 border-yellow-200",
 };
 
 function formatDate(dateString: string): string {
@@ -179,11 +179,24 @@ export default function ProfilePage() {
       );
 
       // 4. Calculate points (example: 10 per approved design, 20 per completed dev)
-      const points = (designCountRaw || 0) * 10 + (devCountRaw || 0) * 20;
-      setPoints(points);
+      // Calculate points: 10 points per page for completed designs + 20 per completed dev project
+      const completedDesigns =
+        designsData?.filter(
+          (design) =>
+            design.status === "completed" ||
+            design.status === "in_development" ||
+            design.status === "accepted"
+        ) || [];
+      const designPoints = completedDesigns.reduce(
+        (total, design) => total + design.pages_count * 10,
+        0
+      );
+      const devPoints = completedDevCount * 30;
+      const totalPoints = designPoints + devPoints;
+      setPoints(totalPoints);
 
       // 5. Calculate level (example: every 100 points = next level)
-      setLevel(Math.floor(points / 100) + 1);
+      setLevel(Math.floor(points / 300) + 1);
 
       setLoading(false);
     }
@@ -204,13 +217,9 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-7xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">Profile Overview</h1>
-
       {/* Earned Badges Section - Clickable for LinkedIn Sharing */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">
-          🏆 Your Achievements (Click to share on LinkedIn!)
-        </h2>
+        <h2 className="text-lg font-semibold mb-4">🏆 Your Achievements</h2>
         <div className="flex flex-wrap gap-4">
           {badges.map((badge) => (
             <div
@@ -250,150 +259,179 @@ export default function ProfilePage() {
             </div>
           ))}
           {/* Display badges for completed designs */}
-		  {designs
-			.filter((design) => design.status === "completed")
-			.map((design) => (
-			  <div
-				key={`design-${design.id}`}
-				className="flex flex-col items-center cursor-pointer transition-transform relative"
-				onClick={() => {
-				  // Toggle options visibility
-				  const optionsDiv = document.getElementById(`design-options-${design.id}`);
-				  if (optionsDiv) {
-					optionsDiv.classList.toggle('hidden');
-				  }
-				}}
-				title={`Click to see options for "${design.name}"`}
-			  >
-				<div className="relative">
-				  <img
-					src="/design-badge.png"
-					alt={`Design Completed: ${design.name}`}
-					className="w-16 h-16 mb-2"
-				  />
-				</div>
-				
-				{/* Options popup panel */}
-				<div
-				  id={`design-options-${design.id}`}
-				  className="hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]"
-				  onClick={(e) => e.stopPropagation()}
-				>
-				  <button
-					onClick={() => {
-					  const link = document.createElement('a');
-					  link.href = '/design-badge.png';
-					  link.download = `design-badge-${design.name.replace(/\s+/g, '-')}.png`;
-					  link.click();
-					  document.getElementById(`design-options-${design.id}`)?.classList.add('hidden');
-					}}
-					className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg border-b border-gray-100"
-				  >
-					Download
-				  </button>
-				  
-				  <button
-					onClick={() => {
-					  shareBadgeOnLinkedIn({
-						id: `design-${design.id}`,
-						name: `Design Completed: ${design.name}`,
-						description: `Successfully completed the design project "${design.name}"`,
-					  });
-					  document.getElementById(`design-options-${design.id}`)?.classList.add('hidden');
-					}}
-					className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
-				  >
-					Share
-				  </button>
-				</div>
-			  </div>
-			))}
+          {designs
+            .filter((design) => design.status === "completed")
+            .map((design) => (
+              <div
+                key={`design-${design.id}`}
+                className="flex flex-col items-center cursor-pointer transition-transform relative"
+                onClick={() => {
+                  // Toggle options visibility
+                  const optionsDiv = document.getElementById(
+                    `design-options-${design.id}`
+                  );
+                  if (optionsDiv) {
+                    optionsDiv.classList.toggle("hidden");
+                  }
+                }}
+                title={`Click to see options for "${design.name}"`}
+              >
+                <div className="relative">
+                  <img
+                    src="/design-badge.png"
+                    alt={`Design Completed: ${design.name}`}
+                    className="w-16 h-16 mb-2"
+                  />
+                </div>
+
+                {/* Options popup panel */}
+                <div
+                  id={`design-options-${design.id}`}
+                  className="hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = "/design-badge.png";
+                      link.download = `design-badge-${design.name.replace(
+                        /\s+/g,
+                        "-"
+                      )}.png`;
+                      link.click();
+                      document
+                        .getElementById(`design-options-${design.id}`)
+                        ?.classList.add("hidden");
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg border-b border-gray-100"
+                  >
+                    Download
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      shareBadgeOnLinkedIn({
+                        id: `design-${design.id}`,
+                        name: `Design Completed: ${design.name}`,
+                        description: `Successfully completed the design project "${design.name}"`,
+                      });
+                      document
+                        .getElementById(`design-options-${design.id}`)
+                        ?.classList.add("hidden");
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
+                  >
+                    Share
+                  </button>
+                </div>
+              </div>
+            ))}
           {/* Display badges for completed development projects */}
           {developmentProjects
             .filter((project) => project.project_status === "completed")
             .map((project) => (
-			<div
-				key={`development-${project.id}`}
-				className="flex flex-col items-center cursor-pointer transition-transform relative"
-				onClick={() => {
-					// Toggle options visibility
-					const optionsDiv = document.getElementById(`options-${project.id}`);
-					if (optionsDiv) {
-						optionsDiv.classList.toggle('hidden');
-					}
-				}}
-				title={`Click to see options for "${project.design_name}"`}
-			>
-				<div className="relative">
-					<img
-						src="/design-badge.png"
-						alt={`Development Completed: ${project.design_name}`}
-						className="w-16 h-16 mb-2"
-					/>
-				</div>
-				
-				{/* Options popup panel */}
-				<div
-					id={`options-${project.id}`}
-					className="hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]"
-					onClick={(e) => e.stopPropagation()}
-				>
-					<button
-						onClick={() => {
-							const link = document.createElement('a');
-							link.href = '/development-badge.webp';
-							link.download = `development-badge-${project.design_name.replace(/\s+/g, '-')}.webp`;
-							link.click();
-							document.getElementById(`options-${project.id}`)?.classList.add('hidden');
-						}}
-						className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg border-b border-gray-100"
-					>
-						Download
-					</button>
-					
-					<button
-						onClick={() => {
-							shareBadgeOnLinkedIn({
-								id: `development-${project.id}`,
-								name: `Development Completed: ${project.design_name}`,
-								description: `Successfully completed the development project "${project.design_name}"`,
-							});
-							document.getElementById(`options-${project.id}`)?.classList.add('hidden');
-						}}
-						className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
-					>
-						Share
-					</button>
-				</div>
-			</div>
+              <div
+                key={`development-${project.id}`}
+                className="flex flex-col items-center cursor-pointer transition-transform relative"
+                onClick={() => {
+                  // Toggle options visibility
+                  const optionsDiv = document.getElementById(
+                    `options-${project.id}`
+                  );
+                  if (optionsDiv) {
+                    optionsDiv.classList.toggle("hidden");
+                  }
+                }}
+                title={`Click to see options for "${project.design_name}"`}
+              >
+                <div className="relative">
+                  <img
+                    src="/design-badge.png"
+                    alt={`Development Completed: ${project.design_name}`}
+                    className="w-16 h-16 mb-2"
+                  />
+                </div>
+
+                {/* Options popup panel */}
+                <div
+                  id={`options-${project.id}`}
+                  className="hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = "/development-badge.webp";
+                      link.download = `development-badge-${project.design_name.replace(
+                        /\s+/g,
+                        "-"
+                      )}.webp`;
+                      link.click();
+                      document
+                        .getElementById(`options-${project.id}`)
+                        ?.classList.add("hidden");
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg border-b border-gray-100"
+                  >
+                    Download
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      shareBadgeOnLinkedIn({
+                        id: `development-${project.id}`,
+                        name: `Development Completed: ${project.design_name}`,
+                        description: `Successfully completed the development project "${project.design_name}"`,
+                      });
+                      document
+                        .getElementById(`options-${project.id}`)
+                        ?.classList.add("hidden");
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
+                  >
+                    Share
+                  </button>
+                </div>
+              </div>
             ))}
         </div>
       </div>
 
       <div className="grid grid-cols-4 gap-6 mb-8 max-w-4xl">
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-		  <div className="text-3xl font-bold text-blue-600">
-			{designs.filter(design => design.status === "completed").length}
-		  </div>
-          <div className="text-gray-700">Designs Created</div>
+        <div className="rounded-lg  shadow p-4 text-center">
+          <div className="text-3xl font-bold text-blue-600">
+            {
+              designs.filter(
+                (design) =>
+                  design.status === "completed" ||
+                  design.status === "in_development" ||
+                  design.status === "accepted"
+              ).length
+            }
+          </div>
+          <div className="text-white">
+            Designs <br /> Completed
+          </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
+        <div className="rounded-lg shadow p-4 text-center">
           <div className="text-3xl font-bold text-green-600">
             {developmentCount}
           </div>
-          <div className="text-gray-700">Developments Completed</div>
+          <div className="text-white">Developments Completed</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
+        <div className="rounded-lg shadow p-4 text-center">
           <div className="text-3xl font-bold text-purple-600">
-			{badges.length + 
-				designs.filter(design => design.status === "completed").length +
-				developmentProjects.filter(project => project.project_status === "completed").length}
+            {badges.length +
+              designs.filter((design) => design.status === "completed").length +
+              developmentProjects.filter(
+                (project) => project.project_status === "completed"
+              ).length}
           </div>
-          <div className="text-gray-700">Badges Earned</div>
+          <div className="text-white">Badges <br /> Earned</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
+        <div className="rounded-lg shadow p-4 text-center">
           <div className="text-3xl font-bold text-yellow-600">{points}</div>
-          <div className="text-gray-700">Points</div>
+          <div className="text-white">Points</div>
         </div>
       </div>
       <div className="flex flex-row border-t border-gray-300 pt-6">
@@ -413,358 +451,177 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1 p-8 rounded-lg">
           {activeView === "design" && (
-            <div className="bg-blue-500 text-white px-4 py-2 rounded">
-              <h2 className="text-xl font-semibold mb-4">Design Details</h2>
-              {/* User's Designs Timeline */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                  Your Design Submissions
-                </h2>
-
-                {designs.length === 0 ? (
-                  <div className="text-center py-8">
-                    <div className="text-gray-400 mb-2">
-                      <svg
-                        className="mx-auto h-12 w-12"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-gray-500">
-                      You haven&apos;t submitted any designs yet.
-                    </p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Submit your first design using the form above!
-                    </p>
+            <div className="text-white px-4 py-2 rounded">
+              {designs.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-2">
+                    <svg
+                      className="mx-auto h-12 w-12"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                      />
+                    </svg>
                   </div>
-                ) : (
-                  <div className="space-y-6">
-                    {designs.map((design: Design) => (
-                      <div
-                        key={design.id}
-                        className="border border-gray-200 rounded-lg p-6"
-                      >
-                        {/* Design Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                              {design.name}
-                              {design.status === "completed" && (
-                                <img
-                                  src="/design-badge.png"
-                                  alt="Design Completed Badge"
-                                  title="Design Completed Badge"
-                                  className="w-7 h-7 ml-2 inline-block align-middle drop-shadow-md"
-                                />
-                              )}
-                            </h3>
-                          </div>
-                          <div className="mt-3 sm:mt-0">
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
-                                STATUS_COLORS[
-                                  design.status as keyof typeof STATUS_COLORS
-                                ] || "bg-gray-100 text-gray-800 border-gray-200"
-                              }`}
-                            >
-                              {STATUS_LABELS[
-                                design.status as keyof typeof STATUS_LABELS
-                              ] || design.status}
-                            </span>
-                          </div>
-                        </div>{" "}
-                        {/* Description */}
-                        {design.description && (
-                          <p className="text-gray-600 mb-4">
-                            {design.description}
-                          </p>
-                        )}
-                        {/* Figma Link */}
-                        {design.figma_link && (
-                          <div className="mb-4">
-                            <a
-                              href={design.figma_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm"
-                            >
-                              <svg
-                                className="w-4 h-4 mr-1"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M15.5 2H8.4c-1.9 0-3.4 1.5-3.4 3.4v13.1c0 1.9 1.5 3.4 3.4 3.4h.9c1.9 0 3.4-1.5 3.4-3.4V16h3.3c3.7 0 6.7-3 6.7-6.7S19.7 2.6 16 2.6L15.5 2zm0 9.3H12v3.4c0 .9-.7 1.7-1.7 1.7h-.9c-.9 0-1.7-.7-1.7-1.7V5.4c0-.9.7-1.7 1.7-1.7h7.1c2.8 0 5 2.2 5 5S18.3 11.3 15.5 11.3z" />
-                              </svg>
-                              View Figma Design
-                            </a>
-                          </div>
-                        )}
-                        {/* Status Timeline */}
-                        <div className="border-t border-gray-200 pt-4">
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">
-                            Progress Timeline
-                          </h4>
-                          <div className="flow-root">
-                            <ul className="-mb-8">
-                              {/* Initial submission */}
-                              <li>
-                                <div className="relative pb-8">
-                                  <span
-                                    className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
-                                    aria-hidden="true"
-                                  />
-                                  <div className="relative flex space-x-3">
-                                    <div>
-                                      <span className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
-                                        <svg
-                                          className="w-4 h-4 text-white"
-                                          fill="currentColor"
-                                          viewBox="0 0 20 20"
-                                        >
-                                          <path
-                                            fillRule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clipRule="evenodd"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </div>
-                                    <div className="min-w-0 flex-1 pt-1.5">
-                                      <div>
-                                        <p className="text-sm text-gray-900">
-                                          Design submitted
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                          {formatDate(design.created_at)}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </li>
-
-                              {/* Status history */}
-                              {design.status_history?.map((history, index) => {
-                                const isLast =
-                                  index === design.status_history!.length - 1;
-                                return (
-                                  <li key={history.id}>
-                                    <div
-                                      className={`relative ${
-                                        !isLast ? "pb-8" : ""
-                                      }`}
-                                    >
-                                      {!isLast && (
-                                        <span
-                                          className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
-                                          aria-hidden="true"
-                                        />
-                                      )}
-                                      <div className="relative flex space-x-3">
-                                        <div>
-                                          <span
-                                            className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                                              history.status === "accepted"
-                                                ? "bg-green-500"
-                                                : history.status ===
-                                                  "in_development"
-                                                ? "bg-blue-500"
-                                                : history.status === "completed"
-                                                ? "bg-purple-500"
-                                                : history.status === "rejected"
-                                                ? "bg-red-500"
-                                                : "bg-yellow-500"
-                                            }`}
-                                          >
-                                            {history.status === "completed" ? (
-                                              <svg
-                                                className="w-4 h-4 text-white"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                              >
-                                                <path
-                                                  fillRule="evenodd"
-                                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                  clipRule="evenodd"
-                                                />
-                                              </svg>
-                                            ) : history.status ===
-                                              "rejected" ? (
-                                              <svg
-                                                className="w-4 h-4 text-white"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                              >
-                                                <path
-                                                  fillRule="evenodd"
-                                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                  clipRule="evenodd"
-                                                />
-                                              </svg>
-                                            ) : (
-                                              <svg
-                                                className="w-4 h-4 text-white"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                              >
-                                                <path
-                                                  fillRule="evenodd"
-                                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                  clipRule="evenodd"
-                                                />
-                                              </svg>
-                                            )}
-                                          </span>
-                                        </div>
-                                        <div className="min-w-0 flex-1 pt-1.5">
-                                          <div>
-                                            <p className="text-sm text-gray-900">
-                                              {
-                                                STATUS_LABELS[
-                                                  history.status as keyof typeof STATUS_LABELS
-                                                ]
-                                              }
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                              {formatDate(history.created_at)}
-                                            </p>
-                                            {history.notes && (
-                                              <p className="text-sm text-gray-600 mt-1">
-                                                {history.notes}
-                                              </p>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          {activeView === "development" && (
-            <div className="bg-green-500 text-white px-4 py-2 rounded">
-              <h2 className="text-xl font-semibold mb-4">
-                Development Details
-              </h2>
-
-              {/* Development Projects Timeline */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                  Your Development Projects
-                </h3>
-
-                {developmentProjects.length === 0 ? (
-                  <div className="text-center py-8">
-                    <div className="text-gray-400 mb-2">
-                      <svg
-                        className="mx-auto h-12 w-12"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-gray-500">
-                      You haven&apos;t joined any development projects yet.
-                    </p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Join a development team to start earning badges!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {developmentProjects.map((project: DevelopmentProject) => (
-                      <div
-                        key={project.id}
-                        className="border border-gray-200 rounded-lg p-4"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-lg font-medium text-gray-900 flex items-center">
-                            {project.design_name}
-                            {project.project_status === "completed" && (
+                  <p className="text-gray-500">
+                    You haven&apos;t submitted any designs yet.
+                  </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Submit your first design using the form above!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {designs.map((design: Design) => (
+                    <div
+                      key={design.id}
+                      className="border border-gray-200 rounded-lg p-2"
+                    >
+                      {/* Design Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-medium text-white flex items-center">
+                            {design.name}
+                            {design.status === "completed" && (
                               <img
-                                src="/development-badge.webp"
-                                alt="Development Completed Badge"
-                                title="Development Completed Badge"
+                                src="/design-badge.png"
+                                alt="Design Completed Badge"
+                                title="Design Completed Badge"
                                 className="w-7 h-7 ml-2 inline-block align-middle drop-shadow-md"
                               />
                             )}
-                          </h4>
+                          </h3>
+                        </div>
+                        <div className="mt-3 sm:mt-0">
                           <span
-                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              project.project_status === "completed"
-                                ? "bg-green-100 text-green-800"
-                                : project.project_status === "in_development"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-gray-100 text-gray-800"
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                              STATUS_COLORS[
+                                design.status as keyof typeof STATUS_COLORS
+                              ] || "bg-gray-100 text-gray-800 border-gray-200"
                             }`}
                           >
-                            {STATUS_LABELS[
-                              project.project_status as keyof typeof STATUS_LABELS
-                            ] || project.project_status}
+                            {design.status === "completed" ||
+                            design.status === "in_development" ||
+                            design.status === "accepted"
+                              ? "Complete"
+                              : design.status === "pending" ||
+                                design.status === "rejected"
+                              ? "Pending"
+                              : STATUS_LABELS[
+                                  design.status as keyof typeof STATUS_LABELS
+                                ] || design.status}
                           </span>
                         </div>
-                        <div className="text-sm text-gray-600">
-                          <p>Joined: {formatDate(project.joined_at)}</p>
-                          {project.role && <p>Role: {project.role}</p>}
-                          {project.completed_at && (
-                            <p>Completed: {formatDate(project.completed_at)}</p>
-                          )}
+                      </div>{" "}
+                      {/* Figma Link */}
+                      {design.figma_link && (
+                        <div className="mb-2">
+                          <a
+                            href={design.figma_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M15.5 2H8.4c-1.9 0-3.4 1.5-3.4 3.4v13.1c0 1.9 1.5 3.4 3.4 3.4h.9c1.9 0 3.4-1.5 3.4-3.4V16h3.3c3.7 0 6.7-3 6.7-6.7S19.7 2.6 16 2.6L15.5 2zm0 9.3H12v3.4c0 .9-.7 1.7-1.7 1.7h-.9c-.9 0-1.7-.7-1.7-1.7V5.4c0-.9.7-1.7 1.7-1.7h7.1c2.8 0 5 2.2 5 5S18.3 11.3 15.5 11.3z" />
+                            </svg>
+                            View Figma Design
+                          </a>
                         </div>
-                      </div>
-                    ))}
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {activeView === "development" && (
+            <div className="text-white px-4 py-2 rounded">
+              {/* Development Projects Timeline */}
+              {developmentProjects.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-white mb-2">
+                    <svg
+                      className="mx-auto h-12 w-12"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
                   </div>
-                )}
-              </div>
-
-              <div className="mt-4 space-y-3 text-white">
-                <p>
-                  <strong>Total Projects:</strong> {developmentProjects.length}
-                </p>
-                <p>
-                  <strong>Completed Projects:</strong>{" "}
-                  {
-                    developmentProjects.filter(
-                      (p) => p.project_status === "completed"
-                    ).length
-                  }
-                </p>
-                <p>
-                  <strong>Points from Development:</strong>{" "}
-                  {developmentProjects.filter(
-                    (p) => p.project_status === "completed"
-                  ).length * 20}
-                </p>
-              </div>
+                  <p className="text-gray-500">
+                    You haven&apos;t joined any development projects yet.
+                  </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Join a development team to start earning badges!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {developmentProjects.map((project: DevelopmentProject) => (
+                    <div
+                      key={project.id}
+                      className="border border-gray-200 rounded-lg p-4"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-lg font-medium text-white flex items-center">
+                          {project.design_name}
+                          {project.project_status === "completed" && (
+                            <img
+                              src="/development-badge.webp"
+                              alt="Development Completed Badge"
+                              title="Development Completed Badge"
+                              className="w-7 h-7 ml-2 inline-block align-middle drop-shadow-md"
+                            />
+                          )}
+                        </h4>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            project.project_status === "completed"
+                              ? "bg-green-100 text-green-800"
+                              : project.project_status === "in_development"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {STATUS_LABELS[
+                            project.project_status as keyof typeof STATUS_LABELS
+                          ] || project.project_status}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <p>Joined: {formatDate(project.joined_at)}</p>
+                        {project.role && <p>Role: {project.role}</p>}
+                        {project.completed_at && (
+                          <p>Completed: {formatDate(project.completed_at)}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           {!activeView && (
