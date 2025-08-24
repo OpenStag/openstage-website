@@ -36,6 +36,20 @@ interface DevelopmentProject {
   role?: string;
 }
 
+interface DevelopmentTeamMemberData {
+  id: string;
+  user_id: string;
+  design_id: string;
+  role?: string;
+  joined_at: string;
+  created_at: string;
+  updated_at?: string;
+  designs?: {
+    name?: string;
+    status?: string;
+  } | null;
+}
+
 const TYPE_LABELS = {
   website: "Website",
   web_application: "Web Application",
@@ -134,7 +148,7 @@ export default function ProfilePage() {
       setDevelopmentCount(devCountRaw || 0);
 
       // Transform development data
-      const developmentProjects = (developmentData || []).map((item: any) => ({
+      const developmentProjects = (developmentData || []).map((item: DevelopmentTeamMemberData) => ({
         id: item.id,
         design_name: item.designs?.name || "Unknown Project",
         project_status: item.designs?.status || "unknown",
