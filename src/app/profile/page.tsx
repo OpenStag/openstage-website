@@ -230,11 +230,11 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-8">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       {/* Earned Badges Section - Clickable for LinkedIn Sharing */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">🏆 Your Achievements</h2>
-        <div className="flex flex-wrap gap-4">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">🏆 Your Achievements</h2>
+        <div className="flex flex-wrap gap-3 sm:gap-4 justify-center sm:justify-start">
           {badges.map((badge) => (
             <div
               key={badge.id}
@@ -248,7 +248,7 @@ export default function ProfilePage() {
                     badge.icon_url ||
                     (badge.name?.toLowerCase().includes("design")
                       ? "/design-badge.png"
-                      : "/development-badge.webp")
+                      : "/devebadge.jpg")
                   }
                   alt={badge.name}
                   className="w-16 h-16 mb-2"
@@ -274,7 +274,7 @@ export default function ProfilePage() {
           ))}
           {/* Display badges for completed designs */}
           {designs
-            .filter((design) => design.status === "completed")
+            .filter((design) => design.status === "completed" || design.status === "accepted" || design.status === "in_development")
             .map((design) => (
               <div
                 key={`design-${design.id}`}
@@ -360,7 +360,7 @@ export default function ProfilePage() {
               >
                 <div className="relative">
                   <img
-                    src="/design-badge.png"
+                    src="/devbadge.jpg"
                     alt={`Development Completed: ${project.design_name}`}
                     className="w-16 h-16 mb-2"
                   />
@@ -411,8 +411,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-6 mb-8 max-w-4xl">
-        <div className="rounded-lg  shadow p-4 text-center">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-6 mb-8 max-w-4xl">
+        <div className="rounded-full border-2  shadow p-4 text-center w-32 h-32">
           <div className="text-3xl font-bold text-blue-600">
             {
               designs.filter(
@@ -427,13 +427,13 @@ export default function ProfilePage() {
             Designs <br /> Completed
           </div>
         </div>
-        <div className="rounded-lg shadow p-4 text-center">
+        <div className="rounded-full border-2 shadow p-4 text-center items-center w-32 h-32">
           <div className="text-3xl font-bold text-green-600">
             {developmentCount}
           </div>
           <div className="text-white">Developments Completed</div>
         </div>
-        <div className="rounded-lg shadow p-4 text-center">
+        <div className="rounded-full border-2 w-32 h-32 shadow p-4 text-center">
           <div className="text-3xl font-bold text-purple-600">
             {badges.length +
               designs.filter((design) => design.status === "completed").length +
@@ -443,7 +443,7 @@ export default function ProfilePage() {
           </div>
           <div className="text-white">Badges <br /> Earned</div>
         </div>
-        <div className="rounded-lg shadow p-4 text-center">
+        <div className="rounded-full border-2 w-32 h-32 shadow p-4 pt-6 text-center">
           <div className="text-3xl font-bold text-yellow-600">{points}</div>
           <div className="text-white">Points</div>
         </div>
