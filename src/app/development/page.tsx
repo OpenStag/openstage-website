@@ -338,7 +338,8 @@ export default function DevelopmentPage() {
 
       // Also fetch the list of designs the current user has joined directly.
       // This avoids RLS/join permission issues when trying to select all team members.
-      let myJoinedIds: string[] = [];
+  interface TeamMemberRow { design_id: string }
+  let myJoinedIds: string[] = [];
       try {
         if (fetchedUserId) {
           const { data: myRows, error: myErr } = await supabase
@@ -346,7 +347,7 @@ export default function DevelopmentPage() {
             .select("design_id")
             .eq("user_id", fetchedUserId);
           if (!myErr && myRows) {
-            myJoinedIds = myRows.map((r: any) => r.design_id);
+            myJoinedIds = myRows.map((r: TeamMemberRow) => r.design_id);
           }
         }
       } catch (e) {
@@ -667,9 +668,25 @@ export default function DevelopmentPage() {
             `)
             .eq("user_id", currentUserId);
 
-          if (!existingError && existingRows && existingRows.length > 0) {
+          if (!existingError && Array.isArray(existingRows) && existingRows.length > 0) {
             // We need to inspect the associated design status for each row.
-            const joinedOngoing = existingRows.some((r: any) => {
+            type ExistingRow = {
+              design_id: string;
+              designs?: { status: string };
+              development_team_members_design_id?: { status: string };
+            };
+            function isExistingRow(r: unknown): r is ExistingRow {
+              return (
+                typeof r === "object" &&
+                r !== null &&
+                "design_id" in r &&
+                typeof (r as { design_id?: unknown }).design_id === "string"
+              );
+            }
+            const filteredRows = Array.isArray(existingRows)
+              ? (existingRows.filter(isExistingRow) as unknown as ExistingRow[])
+              : [];
+            const joinedOngoing = filteredRows.some((r) => {
               const status = r?.designs?.status || r?.development_team_members_design_id?.status || null;
               const id = r?.design_id;
               return id !== designId && status === "in_development";

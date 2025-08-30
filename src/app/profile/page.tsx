@@ -273,11 +273,7 @@ export default function ProfilePage() {
 
             {/* Right side image - hidden on mobile */}
             <div className="hidden lg:block flex-shrink-0">
-              <img
-                src="/team.jpg"
-                alt="Team"
-                className="w-64 h-48 object-cover rounded-lg"
-              />
+              
             </div>
           </div>
         </div>
