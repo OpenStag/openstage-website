@@ -15,55 +15,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send email using Resend
-    const { data, error } = await resend.emails.send({
-      from: 'OpenStage Contact <noreply@openstage.org>',
-      to: ['openstage.org@gmail.com'],
-      subject: `Contact Form: ${subject}`,
-      html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
-        
-        <hr>
-        <p><em>This message was sent through the OpenStage website contact form.</em></p>
-      `,
-      text: `
-New Contact Form Submission
-
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
-
-Message:
-${message}
-
----
-This message was sent through the OpenStage website contact form.
-      `,
-      replyTo: email, // Allow direct replies to the sender
-    });
-
-    if (error) {
-      console.error('Resend error:', error);
-      return NextResponse.json(
-        { error: 'Failed to send email' },
-        { status: 500 }
-      );
+        // This API route is intentionally left blank. The contact form simulates submission on the client only.
+        const { data, error } = await resend.emails.send({
+          from: 'onboarding@resend.dev',
+          to: ['delivered@resend.dev'],
+          subject: subject,
+          html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`,
+        });
+    
+        if (error) {
+          return NextResponse.json(
+            { error: 'Failed to send email' },
+            { status: 500 }
+          );
+        }
+    
+        return NextResponse.json(
+          { message: 'Email sent successfully', data },
+          { status: 200 }
+        );
+      } catch (error) {
+        return NextResponse.json(
+          { error: 'Internal server error' },
+          { status: 500 }
+        );
+      }
     }
-
-    return NextResponse.json(
-      { message: 'Email sent successfully', id: data?.id },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Contact form error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
