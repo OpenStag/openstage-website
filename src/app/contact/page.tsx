@@ -22,31 +22,12 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitMessage('');
-    
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSubmitMessage('Thank you for your message! We\'ll get back to you soon.');
-        setFormData({ name: '', email: '', subject: '', message: '' });
-      } else {
-        setSubmitMessage(`Error: ${result.error || 'Failed to send message. Please try again.'}`);
-      }
-    } catch (error) {
-      console.error('Contact form error:', error);
-      setSubmitMessage('Error: Failed to send message. Please check your connection and try again.');
-    } finally {
+    // Simulate form submission
+    setTimeout(() => {
       setIsSubmitting(false);
-    }
+      setSubmitMessage("Thank you for your message! We'll get back to you soon.");
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    }, 1500);
   };
 
   return (
