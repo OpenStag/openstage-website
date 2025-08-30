@@ -22,13 +22,31 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitMessage('');
     
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSubmitMessage('Thank you for your message! We\'ll get back to you soon.');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        setSubmitMessage(`Error: ${result.error || 'Failed to send message. Please try again.'}`);
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setSubmitMessage('Error: Failed to send message. Please check your connection and try again.');
+    } finally {
       setIsSubmitting(false);
-      setSubmitMessage('Thank you for your message! We\'ll get back to you soon.');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1500);
+    }
   };
 
   return (
@@ -62,7 +80,11 @@ export default function Contact() {
               </h2>
               
               {submitMessage && (
-                <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-300 px-4 py-3 rounded-lg mb-6">
+                <div className={`px-4 py-3 rounded-lg mb-6 ${
+                  submitMessage.startsWith('Error:') 
+                    ? 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-300'
+                    : 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-300'
+                }`}>
                   {submitMessage}
                 </div>
               )}
@@ -166,8 +188,8 @@ export default function Contact() {
                     <p className="text-gray-600 mb-2">
                       For general inquiries and support
                     </p>
-                    <a href="mailto:info@openstage.org" className="text-blue-600 hover:text-blue-700 font-medium">
-                      info@openstage.org
+                    <a href="mailto:openstage.org@gmail.com" className="text-blue-600 hover:text-blue-700 font-medium">
+                      openstage.org@gmail.com
                     </a>
                   </div>
                 </div>

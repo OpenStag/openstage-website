@@ -127,8 +127,7 @@ export default function About() {
               Top Board Of OpenStage
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Behind OpenStage are dedicated individuals who bring diverse skills, experiences, and 
-              passion to make our mission a reality.
+              The OpenStage leadership team consists of passionate, skilled, and experienced individuals committed to turning our mission into reality.
             </p>
           </div>
             <div className="text-center">
@@ -157,20 +156,20 @@ export default function About() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-white mb-2">150+</div>
-              <div className="text-blue-100 text-lg">Students Mentored</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-white mb-2">25+</div>
-              <div className="text-blue-100 text-lg">Projects Completed</div>
+              <div className="text-4xl lg:text-5xl font-bold text-white mb-2">40+</div>
+              <div className="text-blue-100 text-lg">Joined Students</div>
             </div>
             <div className="text-center">
               <div className="text-4xl lg:text-5xl font-bold text-white mb-2">15+</div>
+              <div className="text-blue-100 text-lg">Projects Completed</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl lg:text-5xl font-bold text-white mb-2">2+</div>
               <div className="text-blue-100 text-lg">Partner Organizations</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-white mb-2">95%</div>
-              <div className="text-blue-100 text-lg">Job Placement Rate</div>
+              <div className="text-4xl lg:text-5xl font-bold text-white mb-2">10+</div>
+              <div className="text-blue-100 text-lg">Use Technology</div>
             </div>
           </div>
         </div>

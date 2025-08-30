@@ -14,8 +14,7 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto">
-              A non-profit organization built by passionate individuals to provide real-world IT project experience 
-              to students and young professionals.
+              Built by passionate minds, we create a space where students and young professionals gain real-world IT project experience, collaborate with peers, and turn knowledge into impactful skills.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
@@ -109,7 +108,9 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600"></div>
+              <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600">
+                <img src="/openstageweb.png" alt="OpenStage Website" className="w-full h-full object-cover" />
+              </div>
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">OpenStage Website</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -124,31 +125,35 @@ export default function Home() {
             </div>
             
             <div className="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="h-48 bg-gradient-to-br from-green-400 to-green-600"></div>
+              <div className="h-48 bg-gradient-to-br from-green-400 to-green-600">
+                <img src="/eventManagement.png" alt="Event Management System" className="w-full h-full object-cover" />
+              </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Student Management System</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Event Management System</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  A comprehensive platform for educational institutions to manage student data and academic records.
+                  An all-in-one platform to plan, manage, and track events with effortless registration, scheduling, and participation.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">React</span>
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">Node.js</span>
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">PostgreSQL</span>
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">Html</span>
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">Php</span>
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">MySql</span>
                 </div>
               </div>
             </div>
             
             <div className="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="h-48 bg-gradient-to-br from-purple-400 to-purple-600"></div>
+              <div className="h-48 bg-gradient-to-br from-purple-400 to-purple-600">
+                <img src="/bookShop.png" alt="Book Shop" className="w-full h-full object-cover" />
+              </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Community Event Platform</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Book Shop</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  An event management system helping local communities organize and promote their activities.
+                  We developed a modern bookshop landing page to showcase collections, attract readers, and enhance shopping experiences.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full">Vue.js</span>
-                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full">Express</span>
-                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full">MongoDB</span>
+                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full">Next.js</span>
+                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full">TypeScript</span>
+                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full">Tailwind CSS</span>
                 </div>
               </div>
             </div>
@@ -170,35 +175,32 @@ export default function Home() {
           
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="border-l-4 border-blue-500 pl-6 py-4">
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">January 2025</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">August 2025</div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                New Student Mentorship Program Launched
+                OpenStage website Launched
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                We&apos;ve expanded our reach with a dedicated mentorship program connecting experienced professionals 
-                with aspiring developers. Over 50 students have already joined our community!
+                We&apos;re excited to announce the launch of the OpenStage website! Join a vibrant community, explore IT projects, collaborate with peers, and turn your ideas into real-world experience.
               </p>
             </div>
             
             <div className="border-l-4 border-green-500 pl-6 py-4">
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">December 2024</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">August 2025</div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Community Event Platform Goes Live
+                We start our 15th project
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Our team successfully deployed a full-stack event management platform, now being used by 
-                three local communities to organize their events and activities.
+                Our team proudly reached its 15th milestone, delivering a full-stack solution now empowering three local communities to organize events and activities seamlessly.
               </p>
             </div>
             
             <div className="border-l-4 border-purple-500 pl-6 py-4">
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">November 2024</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">July 2025</div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 OpenStage Foundation Established
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Officially registered as a non-profit organization with a mission to bridge the gap between 
-                academic learning and real-world professional experience in the tech industry.
+                An initiative driven by passionate individuals with a mission to bridge the gap between academic learning and real-world professional experience in the tech industry.
               </p>
             </div>
           </div>
@@ -223,7 +225,7 @@ export default function Home() {
               Volunteer With Us
             </Link>
             <Link
-              href="/about"
+              href="/signup"
               className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
             >
               Become a Mentor
