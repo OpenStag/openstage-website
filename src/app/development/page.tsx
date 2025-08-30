@@ -521,13 +521,6 @@ export default function DevelopmentPage() {
           </div>
         </div>
 
-        {/* Description */}
-        {design.description && (
-          <p className="text-gray-700 mb-4 text-sm leading-relaxed">
-            {design.description}
-          </p>
-        )}
-
         {/* Figma Link */}
         {design.figma_link && (
           <div className="mb-4">
@@ -560,7 +553,7 @@ export default function DevelopmentPage() {
 
         {/* Join Button for Accepted Designs */}
         {showJoinButton && (
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex-2 flex-col sm:flex-row gap-2">
             <button
               className={`flex-1 ${
                 isFull || (userHasOngoingProject() && !isDesignJoinedByCurrentUser(design))
@@ -583,9 +576,6 @@ export default function DevelopmentPage() {
                 ? "Already in another project"
                 : "Join Project"}
             </button>
-            <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-              View Details
-            </button>
           </div>
         )}
       </div>
@@ -594,12 +584,10 @@ export default function DevelopmentPage() {
 
   const SectionHeader = ({
     title,
-    count,
     description,
     icon,
   }: {
     title: string;
-    count: number;
     description: string;
     icon: React.ReactNode;
   }) => (
@@ -608,9 +596,6 @@ export default function DevelopmentPage() {
         <div className="flex items-center">
           {icon}
           <h2 className="text-2xl font-bold text-white ml-2">{title}</h2>
-          <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-            {count}
-          </span>
         </div>
         <p className="text-white mt-1">{description}</p>
       </div>
@@ -857,7 +842,6 @@ export default function DevelopmentPage() {
           <section id="join-now-section" className="mb-12">
             <SectionHeader
               title="Join Now"
-              count={acceptedDesigns.length}
               description=""
               icon={
                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -918,7 +902,6 @@ export default function DevelopmentPage() {
           <section id="ongoing-section" className="mb-12">
             <SectionHeader
               title="Ongoing Projects"
-              count={currentUserId ? ongoingDesigns.filter(isDesignJoinedByCurrentUser).length : 0}
               description=""
               icon={
                 <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -975,7 +958,6 @@ export default function DevelopmentPage() {
           <section id="completed-section">
             <SectionHeader
               title="Completed Projects"
-              count={currentUserId ? completedDesigns.filter(isDesignJoinedByCurrentUser).length : 0}
               description=""
               icon={
                 <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">

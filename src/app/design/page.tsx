@@ -168,7 +168,7 @@ export default function DesignPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Submit Your Design</h1>
           <p className="mt-2">
-            Upload your design details and track their progress through our review process.
+            Upload your UI/UX design and Earn badges.
           </p>
         </div>
 

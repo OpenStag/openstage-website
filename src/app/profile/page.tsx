@@ -167,15 +167,26 @@ export default function ProfilePage() {
           } | null;
         };
         
-        setBadges(
-          (badgeRows as BadgeRow[] | undefined)?.map((row) => ({
-            id: row.achievement_id,
-            name: row.achievements?.name ?? "",
-            description: row.achievements?.description ?? "",
-            icon_url: row.achievements?.icon_url,
-            badge_color: row.achievements?.badge_color,
-          })) || []
-        );
+        // Convert badge data and add automatic "New Member" badge
+        const userBadges = (badgeRows as BadgeRow[] | undefined)?.map((row) => ({
+          id: row.achievement_id,
+          name: row.achievements?.name ?? "",
+          description: row.achievements?.description ?? "",
+          icon_url: row.achievements?.icon_url,
+          badge_color: row.achievements?.badge_color,
+        })) || [];
+
+        // Add "New Member" badge for all registered users
+        const newMemberBadge: Badge = {
+          id: "new-member",
+          name: "New Member",
+          description: "Welcome to OpenStage! Ready to start your journey.",
+          icon_url: "/memBadge.png",
+          badge_color: "#22c55e"
+        };
+
+        // Combine all badges with New Member badge first
+        setBadges([newMemberBadge, ...userBadges]);
 
         // 4. Calculate points
         const completedDesigns =
@@ -280,20 +291,17 @@ export default function ProfilePage() {
           
           <div className="overflow-x-auto">
             <div className="flex gap-4 pb-2 min-w-max">
-              {/* User badges */}
+              {/* User badges (including automatic New Member badge) */}
               {badges.map((badge) => (
                 <div
                   key={badge.id}
                   onClick={() => shareBadgeOnLinkedIn(badge)}
-                  className="flex-shrink-0 w-32 bg-slate-700 rounded-lg p-3 cursor-pointer hover:bg-slate-600 transition-colors"
                 >
                   <img
-                    src={badge.icon_url || "/design-badge.png"}
+                    src={badge.icon_url || "/desBadge.png"}
                     alt={badge.name}
-                    className="w-12 h-12 mx-auto mb-2"
+                    className="w-25 h-25 mx-auto mb-2"
                   />
-                  <div className="text-sm font-medium text-center truncate">{badge.name}</div>
-                  <div className="text-xs text-slate-400 text-center">{badge.description}</div>
                 </div>
               ))}
 
@@ -306,15 +314,12 @@ export default function ProfilePage() {
                     name: `Design: ${design.name}`,
                     description: `Completed design project with ${design.pages_count} pages`
                   })}
-                  className="flex-shrink-0 w-32 bg-slate-700 rounded-lg p-3 cursor-pointer hover:bg-slate-600 transition-colors"
                 >
                   <img
-                    src="/design-badge.png"
+                    src="/desBadge.png"
                     alt={design.name}
-                    className="w-12 h-12 mx-auto mb-2"
+                    className="w-25 h-25 mx-auto mb-2"
                   />
-                  <div className="text-sm font-medium text-center truncate">{design.name}</div>
-                  <div className="text-xs text-slate-400 text-center">{formatDate(design.created_at)}</div>
                 </div>
               ))}
 
@@ -327,15 +332,12 @@ export default function ProfilePage() {
                     name: `Development: ${project.design_name}`,
                     description: `Completed development project`
                   })}
-                  className="flex-shrink-0 w-32 bg-slate-700 rounded-lg p-3 cursor-pointer hover:bg-slate-600 transition-colors"
                 >
                   <img
-                    src="/development-badge.webp"
+                    src="/devBadge.png"
                     alt={project.design_name}
-                    className="w-12 h-12 mx-auto mb-2"
+                    className="w-25 h-25 mx-auto mb-2"
                   />
-                  <div className="text-sm font-medium text-center truncate">{project.design_name}</div>
-                  <div className="text-xs text-slate-400 text-center">{formatDate(project.joined_at)}</div>
                 </div>
               ))}
             </div>
@@ -398,33 +400,13 @@ export default function ProfilePage() {
                             </span>
                           </div>
                           {design.status === "completed" && (
-                            <img src="/design-badge.png" alt="Completed" className="w-8 h-8" />
+                            <img src="/desBadge.png" alt="Completed" className="w-8 h-8" />
                           )}
                         </div>
                         
                         <div className="text-sm text-slate-400 space-y-1">
-                          <p>Type: {TYPE_LABELS[design.type as keyof typeof TYPE_LABELS] || design.type}</p>
-                          <p>Pages: {design.pages_count}</p>
                           <p>Created: {formatDate(design.created_at)}</p>
                         </div>
-
-                        {design.description && (
-                          <p className="text-sm text-slate-300 mt-2 line-clamp-2">{design.description}</p>
-                        )}
-
-                        {design.figma_link && (
-                          <a
-                            href={design.figma_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center mt-3 text-blue-400 hover:text-blue-300 text-sm"
-                          >
-                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M15.5 2H8.4c-1.9 0-3.4 1.5-3.4 3.4v13.1c0 1.9 1.5 3.4 3.4 3.4h.9c1.9 0 3.4-1.5 3.4-3.4V16h3.3c3.7 0 6.7-3 6.7-6.7S19.7 2.6 16 2.6L15.5 2zm0 9.3H12v3.4c0 .9-.7 1.7-1.7 1.7h-.9c-.9 0-1.7-.7-1.7-1.7V5.4c0-.9.7-1.7 1.7-1.7h7.1c2.8 0 5 2.2 5 5S18.3 11.3 15.5 11.3z" />
-                            </svg>
-                            View in Figma
-                          </a>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -465,7 +447,7 @@ export default function ProfilePage() {
                             </span>
                           </div>
                           {project.project_status === "completed" && (
-                            <img src="/development-badge.webp" alt="Completed" className="w-8 h-8" />
+                            <img src="/devBadge.png" alt="Completed" className="w-8 h-8" />
                           )}
                         </div>
                         

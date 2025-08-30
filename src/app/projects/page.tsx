@@ -24,83 +24,83 @@ const projectsData: Project[] = [
     id: '1',
     name: 'OpenStage Website',
     description: 'A modern platform for connecting students with mentors and projects. Features include user authentication, project management, and real-time collaboration tools.',
-    image: '/team.jpg',
+    image: '/openstageweb.png',
     github_link: 'https://github.com/OpenStag/openstage-website',
-    live_demo: 'https://openstage.dev',
-    technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Supabase', 'PostgreSQL'],
+    live_demo: 'https://openstag.vercel.app/',
+    technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Supabase'],
     category: 'web',
     status: 'completed',
-    team_members: ['Alex Johnson', 'Sarah Chen', 'Mike Rodriguez'],
-    completion_date: '2024-12-15',
+    team_members: ['Janith Wathsala'],
+    completion_date: '2025-08-30',
     featured: true
   },
   {
     id: '2',
-    name: 'Task Management Dashboard',
-    description: 'A comprehensive task management system with drag-and-drop functionality, team collaboration features, and advanced analytics.',
-    image: '/api/placeholder/600/400',
-    github_link: 'https://github.com/openstage/task-dashboard',
-    live_demo: 'https://tasks.openstage.dev',
-    technologies: ['React', 'Node.js', 'MongoDB', 'Express', 'Socket.io'],
+    name: 'Shoe Shop Website',
+    description: 'An e-commerce platform for footwear retail featuring product catalogs, shopping cart functionality and inventory management system.',
+    image: '/shooshop.png',
+    github_link: 'https://github.com/OpenStag/project-6',
+    live_demo: '',
+    technologies: ['HTML', 'CSS', 'Java Script'],
     category: 'web',
     status: 'completed',
-    team_members: ['Emma Wilson', 'David Park', 'Lisa Zhang'],
-    completion_date: '2024-11-20',
+    team_members: ['Achintha', 'Sahiru', 'Janitha', 'Lochana', 'Theekshana'],
+    completion_date: '2025-08-01',
     featured: true
   },
   {
     id: '3',
-    name: 'E-Learning Platform',
-    description: 'Interactive online learning platform with video streaming, quiz system, progress tracking, and certificate generation.',
-    image: '/api/placeholder/600/400',
-    github_link: 'https://github.com/openstage/elearning-platform',
-    live_demo: 'https://learn.openstage.dev',
-    technologies: ['Vue.js', 'Laravel', 'MySQL', 'Redis', 'AWS S3'],
+    name: 'Clothing Shop',
+    description: 'An elegant e-commerce platform for fashion retail featuring responsive design, product galleries, size guides integration for clothing.',
+    image: '/clothinshop.png',
+    github_link: 'https://github.com/OpenStag/project-5',
+    live_demo: '',
+    technologies: ['HTML', 'Laravel', 'CSS', 'Java Script'],
     category: 'web',
     status: 'completed',
-    team_members: ['John Smith', 'Maria Garcia', 'Kevin Lee'],
-    completion_date: '2024-10-30',
+    team_members: ['Pasindu', 'Supasan', 'Nisansala','Himash'],
+    completion_date: '2025-07-24',
     featured: false
   },
   {
     id: '4',
-    name: 'Mobile Fitness App',
-    description: 'Cross-platform mobile app for fitness tracking with workout plans, nutrition logging, and social features.',
-    image: '/api/placeholder/600/400',
-    github_link: 'https://github.com/openstage/fitness-app',
-    technologies: ['React Native', 'Firebase', 'Redux', 'Expo'],
-    category: 'mobile',
+    name: 'Event Management System',
+    description: 'A comprehensive event management system for organizing, planning and managing events',
+    image: '/eventManagement.png',
+    github_link: 'https://github.com/OpenStag/project-4',
+    technologies: ['Html', 'CSS', 'Java Script', 'Php'],
+    category: 'web',
     status: 'completed',
-    team_members: ['Jessica Brown', 'Carlos Martinez', 'Amy Wang'],
-    completion_date: '2024-09-15',
+    team_members: ['Hamdhi', 'Senura', 'Pasindu', 'Nadhul', 'Janitha'],
+    completion_date: '2025-07-21',
     featured: true
   },
   {
     id: '5',
-    name: 'Restaurant POS System',
-    description: 'Point-of-sale system for restaurants with inventory management, order tracking, and sales analytics.',
-    image: '/api/placeholder/600/400',
-    github_link: 'https://github.com/openstage/restaurant-pos',
-    live_demo: 'https://pos.openstage.dev',
-    technologies: ['Angular', 'Spring Boot', 'PostgreSQL', 'Docker'],
+    name: 'Travel Website',
+    description: 'A travel website offering booking services, travel guides, and user reviews.',
+    image: '/travelweb.png',
+    github_link: 'https://github.com/OpenStag/Project-3',
+    live_demo: '',
+    technologies: ['HTML', 'CSS', 'Java Script'],
     category: 'web',
     status: 'completed',
-    team_members: ['Robert Kim', 'Natalie Davis', 'Tom Johnson'],
-    completion_date: '2024-08-25',
+    team_members: ['Supasana', 'Janitha', 'Nisansala','Lochana'],
+    completion_date: '2025-07-13',
     featured: false
   },
   {
     id: '6',
-    name: 'Social Media Analytics',
-    description: 'Analytics dashboard for social media metrics with real-time data visualization and automated reporting.',
-    image: '/api/placeholder/600/400',
-    github_link: 'https://github.com/openstage/social-analytics',
-    live_demo: 'https://analytics.openstage.dev',
-    technologies: ['Python', 'Django', 'PostgreSQL', 'Celery', 'Chart.js'],
+    name: 'Coffee Shop Website',
+    description: 'A cozy coffee shop website with online ordering, menu display, and customer reviews.',
+    image: '/coffeshop.png',
+    github_link: 'https://github.com/OpenStag/Project-2',
+    live_demo: '',
+    technologies: ['HTML', 'CSS', 'Java Script'],
     category: 'web',
     status: 'in-progress',
-    team_members: ['Grace Liu', 'James Wilson', 'Sofia Rodriguez'],
-    completion_date: '2025-01-15',
+    team_members: ['Achintha', 'Pasindu', 'Tharindu Thilakshana'],
+    completion_date: '2025-07-09',
     featured: false
   },
 ]
@@ -144,15 +144,15 @@ export default function ProjectsPage() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 max-w-4xl mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-6">
-                <div className="text-2xl lg:text-3xl font-bold text-yellow-400 mb-2">14</div>
+                <div className="text-2xl lg:text-3xl font-bold text-yellow-400 mb-2">15+</div>
                 <div className="text-sm lg:text-base text-blue-100">Total Projects</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-6">
-                <div className="text-2xl lg:text-3xl font-bold text-green-400 mb-2">11</div>
+                <div className="text-2xl lg:text-3xl font-bold text-green-400 mb-2">15+</div>
                 <div className="text-sm lg:text-base text-blue-100">Completed</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-6">
-                <div className="text-2xl lg:text-3xl font-bold text-orange-400 mb-2">8+</div>
+                <div className="text-2xl lg:text-3xl font-bold text-orange-400 mb-2">10+</div>
                 <div className="text-sm lg:text-base text-blue-100">Technologies</div>
               </div>
             </div>
