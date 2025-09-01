@@ -24,7 +24,7 @@ export default function Home() {
                 Learn About Our Mission
               </Link>
               <Link
-                href="/contact"
+                href="/login"
                 className="border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-white transition-colors"
               >
                 Get Involved
